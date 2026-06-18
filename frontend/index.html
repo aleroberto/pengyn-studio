@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Pulse Content | Posts para Instagram com IA</title>
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <span>Pulse Content</span>
+    </div>
+
+    <div class="secure">
+      🛡️ Pagamento 100% seguro
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- HERO MOBILE FIRST -->
+    <section class="hero">
+
+      <div class="badge">
+        🤖 IA + Design Profissional
+      </div>
+
+      <h1>
+        Crie posts incríveis para o Instagram
+        <span>em segundos com IA</span> 🚀
+      </h1>
+
+      <p class="hero-subtitle">
+        Escolha seu nicho, estilo e quantidade. Pague e gere imagens prontas para postar.
+      </p>
+
+      <div class="benefits">
+        <div class="benefit">
+          <strong>⚡ Rápido</strong>
+          <p>Gere em segundos</p>
+        </div>
+
+        <div class="benefit">
+          <strong>🎨 Profissional</strong>
+          <p>Design de alta qualidade</p>
+        </div>
+
+        <div class="benefit">
+          <strong>📈 Eficiente</strong>
+          <p>Mais conteúdo para vender</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- PREVIEW -->
+    <section class="preview-card">
+
+      <h2>Exemplos de posts que você pode gerar:</h2>
+
+      <div class="post-grid">
+
+        <article class="post post-dark">
+          <div class="post-overlay"></div>
+
+          <div class="post-content">
+
+          </div>
+        </article>
+
+        <article class="post post-food">
+          <div class="post-overlay"></div>
+
+          <div class="post-content">
+     
+          </div>
+        </article>
+
+        <article class="post post-light">
+          <div class="post-overlay"></div>
+
+          <div class="post-content">
+
+          </div>
+        </article>
+
+      </div>
+
+    </section>
+
+    <!-- FORM -->
+    <section class="form-card">
+
+      <h2>Monte seu pacote de imagens</h2>
+
+      <form>
+
+        <div class="step">
+          <div class="step-number">1</div>
+
+          <div class="step-content">
+            <h3>Escolha o nicho do seu negócio</h3>
+
+            <select id="nicho">
+              <option value="">Selecione o nicho</option>
+              <option>Barbearia</option>
+              <option>Hamburgueria</option>
+              <option>Clínica de estética</option>
+              <option>Academia</option>
+              <option>Loja feminina</option>
+              <option>Dentista</option>
+              <option>Corretor</option>
+              <option>Advogado</option>
+              <option>Psicólogo</option>
+              <option>Outro</option>
+            </select>
+
+            <div class="chips" data-target="nicho">
+              <button type="button">✂️ Barbearia</button>
+              <button type="button">🍔 Hamburgueria</button>
+              <button type="button">✨ Estética</button>
+              <button type="button">🏋️ Academia</button>
+              <button type="button">🛍️ Loja feminina</button>
+              <button type="button">🦷 Dentista</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+
+          <div class="step-content">
+            <h3>Escolha o estilo das imagens</h3>
+
+            <select id="estilo">
+              <option value="">Selecione o estilo</option>
+              <option>Premium</option>
+              <option>Moderno</option>
+              <option>Dark</option>
+              <option>Minimalista</option>
+              <option>Luxo</option>
+              <option>Feminino</option>
+              <option>Tech</option>
+              <option>Pinterest</option>
+              <option>Elegante</option>
+              <option>Neon</option>
+            </select>
+
+            <div class="chips" data-target="estilo">
+              <button type="button">🏆 Premium</button>
+              <button type="button">🌆 Moderno</button>
+              <button type="button">🌑 Dark</button>
+              <button type="button">◻️ Minimalista</button>
+              <button type="button">🔥 Luxo</button>
+              <button type="button">🌸 Feminino</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+
+          <div class="step-content">
+            <h3>Quantidade de imagens</h3>
+
+            <div class="plans">
+              <button type="button" class="plan active" data-qtd="3" data-price="9.90">
+                <strong>3 imagens</strong>
+                <span>R$ 9,90</span>
+              </button>
+
+              <button type="button" class="plan" data-qtd="5" data-price="14.90">
+                <strong>5 imagens</strong>
+                <span>R$ 14,90</span>
+              </button>
+
+              <button type="button" class="plan" data-qtd="10" data-price="24.90">
+                <strong>10 imagens</strong>
+                <span>R$ 24,90</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+
+          <div class="step-content">
+            <h3>Conteúdo do seu post</h3>
+
+            <label for="titulo">Título principal</label>
+            <input
+              id="titulo"
+              type="text"
+              placeholder="Ex: Promoção de corte masculino"
+            />
+
+            <label for="texto">Texto complementar <span>(opcional)</span></label>
+            <input
+              id="texto"
+              type="text"
+              placeholder="Ex: Agende hoje com desconto especial"
+            />
+          </div>
+        </div>
+
+        <div class="checkout-card">
+          <div class="summary-icon">📄</div>
+
+          <div class="summary">
+            <span>Resumo do pedido</span>
+            <strong id="summaryQtd">3 imagens</strong>
+            <small>Entrega imediata · Alta qualidade</small>
+          </div>
+
+          <div class="total">
+            <span>Total</span>
+            <strong id="summaryPrice">R$ 9,90</strong>
+            <small>🔒 Ambiente seguro</small>
+          </div>
+        </div>
+
+        <button type="button" class="pay-button" id="payButton">
+          Continuar para o pagamento →
+        </button>
+
+      </form>
+
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

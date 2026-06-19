@@ -1,487 +1,546 @@
-:root {
-  --bg: #070b16;
-  --line: rgba(255, 255, 255, 0.1);
-  --text: #f7f7fb;
-  --muted: #a5acc0;
-  --purple: #8b3dff;
-  --purple-light: #b772ff;
-}
-
+/* ==========================================================================
+   1. RESET & VARIÁVEIS
+   ========================================================================== */
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
+:root {
+  --bg-main: #0B0F19;
+  --bg-card: #151B2C;
+  --bg-input: #1E2640;
+  --primary: #6366F1;
+  --primary-hover: #4F46E5;
+  --text-main: #FFFFFF;
+  --text-muted: #9CA3AF;
+  --border: #263152;
+  --radius: 14px;
 }
 
 body {
-  margin: 0;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  display: flex;
+  justify-content: center;
+  padding: 16px;
   min-height: 100vh;
-  font-family: Inter, system-ui, sans-serif;
-  color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgba(139, 61, 255, .18), transparent 32%),
-    radial-gradient(circle at bottom right, rgba(85, 215, 255, .12), transparent 34%),
-    var(--bg);
 }
 
-button,
-input,
-select {
-  font: inherit;
-}
-
-.topbar {
+/* CONTAINER PRINCIPAL MOBILE-FIRST */
+.app-container {
   width: 100%;
-  max-width: 1400px;
-  margin: 18px auto 0;
-  padding: 0 14px;
+  max-width: 480px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 32px;
+  padding-bottom: 40px;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 22px;
-  font-weight: 800;
-}
-
-.brand-icon {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--purple), #5c20ff);
-  box-shadow: 0 0 30px rgba(139, 61, 255, .45);
-}
-
-.secure {
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.page {
-  width: 100%;
-  max-width: 1400px;
-  margin: 24px auto 48px;
-  padding: 0 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
-
-.hero {
+/* ==========================================================================
+   2. HERO SECTION & VITRINE (CARROSSEL)
+   ========================================================================== */
+.hero-section {
   text-align: center;
+  margin-top: 16px;
 }
 
-.badge {
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto 16px;
-  padding: 9px 15px;
-  border-radius: 999px;
-  color: #dcb7ff;
-  background: rgba(139, 61, 255, .16);
-  font-size: 13px;
-  font-weight: 800;
+.hero-section .logo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+  color: var(--text-main);
 }
 
-.hero h1 {
-  margin: 0;
-  font-size: clamp(32px, 9vw, 56px);
-  line-height: 1.05;
-  letter-spacing: -0.05em;
+.hero-section .logo span {
+  color: var(--primary);
 }
 
-.hero h1 span {
-  color: var(--purple-light);
+.hero-section h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
 }
 
-.hero-subtitle {
-  max-width: 520px;
-  margin: 16px auto 0;
-  color: var(--muted);
-  font-size: 16px;
+.hero-section .subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
   line-height: 1.5;
 }
 
-.benefits {
-  margin-top: 22px;
-  display: grid;
-  gap: 10px;
-}
-
-.benefit {
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, .035);
-  text-align: left;
-}
-
-.benefit strong {
-  display: block;
-  margin-bottom: 4px;
-}
-
-.benefit p {
-  margin: 0;
-  color: var(--muted);
-}
-
-.form-card,
-.preview-card,
-.checkout-card {
+.showcase-section {
   width: 100%;
-  max-width: 100%;
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(22, 31, 50, .9), rgba(12, 18, 31, .86));
-  box-shadow: 0 24px 80px rgba(0, 0, 0, .35);
-  backdrop-filter: blur(16px);
 }
 
-.preview-card,
-.form-card {
-  overflow: hidden;
-  border-radius: 20px;
-  padding: 18px;
-}
-
-.preview-card h2,
-.form-card h2 {
-  margin: 0 0 18px;
-  font-size: 20px;
-}
-
-/* IMAGENS */
-
-.post-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-.post {
+/* Container que segura o carrossel */
+.carousel-container {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  min-height: auto;
   position: relative;
   overflow: hidden;
-  border-radius: 18px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
-  border: 1px solid rgba(255, 255, 255, .08);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-.post-dark {
-  background-image: url("./images/barbearia.png");
+/* Linha que move os slides lateralmente */
+.carousel-track {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 300%;
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
 }
 
-.post-food {
-  background-image: url("./images/hamburgueria.png");
-  background-size: contain;
-  background-color: #050505;
-}
-
-.post-light {
-  background-image: url("./images/estetica.png");
-}
-
-/* Remove texto e sombra por cima das imagens */
-.post-overlay,
-.post-content {
-  display: none;
-}
-
-.step {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  margin-bottom: 24px;
-}
-
-.step-number {
-  width: 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--purple), #6a35ff);
-  font-weight: 800;
-}
-
-.step-content {
-  min-width: 0;
-}
-
-.step-content h3 {
-  margin: 0 0 12px;
-  font-size: 17px;
-}
-
-select,
-input {
-  width: 100%;
-  max-width: 100%;
-  height: 52px;
-  color: var(--text);
-  background: rgba(255, 255, 255, .035);
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  padding: 0 14px;
-  outline: none;
-}
-
-select:focus,
-input:focus {
-  border-color: rgba(139, 61, 255, .75);
-  box-shadow: 0 0 0 4px rgba(139, 61, 255, .12);
-}
-
-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-
-  background-color: #111827;
-  color: white;
-}
-
-option {
-  background-color: #111827;
-  color: white;
-}
-
-label {
+/* Cada bloco do slide ocupa exatamente 1/3 da largura total */
+.carousel-slide {
+  width: 33.333% !important;
+  flex-shrink: 0 !important;
   display: block;
-  margin: 14px 0 8px;
-  color: #d8dced;
-  font-size: 14px;
+}
+
+/* Wrapper da imagem respeitando o formato quadrado */
+.carousel-slide .image-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: transparent;
+  display: block;
+}
+
+/* A imagem vai preencher o espaço de forma natural e idêntica ao arquivo original */
+.carousel-slide .image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+}
+
+.card-info {
+  padding: 12px;
+  text-align: center;
+  background: rgba(21, 27, 44, 0.8);
+  border-top: 1px solid var(--border);
+}
+
+.card-info span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
   font-weight: 600;
 }
 
-label span {
-  color: var(--muted);
+.carousel-indicators {
+  position: absolute;
+  bottom: 50px; 
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.carousel-indicators .dot {
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.carousel-indicators .dot.active {
+  background: var(--primary);
+  transform: scale(1.2);
+  width: 18px; 
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   3. FORMULÁRIO CONFIGURAÇÃO (CHIPS) & PLANOS
+   ========================================================================== */
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.config-section h2, .plans-section h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 .chips {
   display: flex;
+  gap: 8px;
   flex-wrap: wrap;
-  gap: 9px;
-  padding: 12px 0 2px;
 }
 
 .chips button {
-  max-width: 100%;
-  color: #dfe3f4;
-  background: rgba(255, 255, 255, .045);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 13px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 10px 18px;
+  border-radius: 100px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  white-space: normal;
+  transition: all 0.2s ease;
 }
 
-.chips button.active,
 .chips button:hover {
-  color: #fff;
-  border-color: rgba(139, 61, 255, .85);
-  background: rgba(139, 61, 255, .16);
+  border-color: var(--primary);
 }
 
 .chips button.active {
-  border-color: #8b3dff;
-  background: rgba(139, 61, 255, 0.18);
-
-  box-shadow:
-    0 0 0 3px rgba(139, 61, 255, 0.12);
-
-  color: white;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #FFFFFF;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-.plans {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+.input-group input {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 14px;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-group input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.plans-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
 }
 
 .plan {
-  min-height: 72px;
-  color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  background: rgba(255, 255, 255, .035);
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   cursor: pointer;
-}
-
-.plan strong {
-  display: block;
-  font-size: 18px;
-}
-
-.plan span {
-  display: block;
-  margin-top: 4px;
-  color: var(--muted);
+  transition: all 0.2s ease;
 }
 
 .plan.active {
-  border-color: var(--purple);
-  background: rgba(139, 61, 255, .18);
-  box-shadow: 0 0 0 4px rgba(139, 61, 255, .08);
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.plan-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.plan-info strong {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.plan-info span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.plan-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.plan.active .plan-price {
+  color: var(--primary);
+}
+
+.badge-pop, .badge-save {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-pop {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--primary);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.badge-save {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.plan.active .badge-pop {
+  background: var(--primary);
+  color: #FFFFFF;
+}
+
+/* ==========================================================================
+   4. CHECKOUT SAAS PREMIUM
+   ========================================================================== */
+.checkout-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
 }
 
 .checkout-card {
-  margin: 8px 0 18px;
-  border-radius: 18px;
-  padding: 18px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.summary-icon {
+.checkout-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.checkout-left {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.receipt-icon {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--primary);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.receipt-text h3 {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.receipt-text h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.receipt-text p {
+  font-size: 0.8rem;
+  color: #747D93;
+  line-height: 1.4;
+}
+
+.checkout-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.total-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.total-price {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 2px 0 6px 0;
+}
+
+.secure-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #747D93;
+}
+
+.checkout-divider {
+  border: none;
+  border-top: 1px solid rgba(38, 49, 82, 0.5);
+  margin: 0;
+}
+
+/* SEÇÃO DE CAPTURA DE DADOS NO CHECKOUT */
+.client-data-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.client-data-group h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.checkout-input-wrapper {
+  width: 100%;
+}
+
+.checkout-input-wrapper input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.checkout-input-wrapper input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+.checkout-input-wrapper input::placeholder {
+  color: #5B6580;
+}
+
+/* GRID DOS LOGOS (TOTALMENTE INTEGRADO E SEM REPETIÇÕES) */
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  width: 100%;
+  border: none !important;
+  padding: 0;
+}
+
+.method-card {
+  background: rgba(30, 38, 64, 0.2); 
+  border: 1px solid rgba(38, 49, 82, 0.4); 
+  border-radius: 6px;
+  height: 34px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 2px;
+  transition: all 0.2s ease;
+}
+
+.method-card:hover {
+  border-color: var(--primary);
+  background: rgba(30, 38, 64, 0.4);
+}
+
+.method-card svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 16px;
+}
+
+/* EFEITO CURSOR PISCANDO */
+.type-cursor {
+  color: var(--primary);
+  font-weight: 400;
+  animation: blink 0.7s infinite;
+  margin: 0 2px; /* Corrigido: sintaxe de margem limpa */
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Cor de destaque para o texto dinâmico */
+.dynamic-text {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* BOTÃO DE COMPRA */
+.pay-button {
+  background: var(--primary);
+  color: #FFFFFF;
+  border: none;
+  padding: 16px;
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.pay-button:hover {
+  background: var(--primary-hover);
+}
+
+/* BOTÃO FLUTUANTE DO WHATSAPP */
+.whatsapp-sticky {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: #25D366;
+  color: #FFFFFF;
   width: 56px;
   height: 56px;
-  display: grid;
-  place-items: center;
-  border-radius: 15px;
-  font-size: 28px;
-  background: rgba(139, 61, 255, .22);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
+  z-index: 999;
+  transition: transform 0.2s ease;
 }
 
-.summary span,
-.total span {
-  display: block;
-  color: var(--muted);
-}
-
-.summary strong,
-.total strong {
-  display: block;
-  margin: 4px 0;
-  font-size: 20px;
-}
-
-.total strong {
-  color: var(--purple-light);
-  font-size: 34px;
-}
-
-.summary small,
-.total small {
-  color: var(--muted);
-}
-
-.pay-button {
-  width: 100%;
-  height: 60px;
-  color: #fff;
-  border: 0;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #7c35ff, #b42bff);
-  font-size: 17px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 18px 50px rgba(139, 61, 255, .35);
-}
-
-/* TABLET */
-
-@media (min-width: 700px) {
-  .topbar {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 24px;
-  }
-
-  .page {
-    padding: 0 24px;
-  }
-
-  .benefits {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .preview-card,
-  .form-card {
-    padding: 28px;
-  }
-
-  .post-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .plans {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .step {
-    grid-template-columns: 34px 1fr;
-    gap: 14px;
-  }
-
-  .checkout-card {
-    grid-template-columns: 70px 1fr auto;
-    align-items: center;
-  }
-
-  .total {
-    text-align: right;
-  }
-}
-
-/* DESKTOP */
-
-@media (min-width: 1050px) {
-  .page {
-    display: grid;
-    grid-template-columns: 1fr 1.12fr;
-    grid-template-areas:
-      "form hero"
-      "form preview";
-    gap: 34px;
-    align-items: start;
-  }
-
-  .form-card {
-    grid-area: form;
-    padding: 34px;
-  }
-
-  .hero {
-    grid-area: hero;
-    padding-top: 10px;
-  }
-
-  .preview-card {
-    grid-area: preview;
-    padding: 28px;
-  }
-
-  .hero h1 {
-    max-width: 730px;
-    margin: 0 auto;
-    font-size: 58px;
-  }
-
-  .hero-subtitle {
-    display: none;
-  }
-
-  .form-card h2 {
-    font-size: 28px;
-  }
+.whatsapp-sticky:hover {
+  transform: scale(1.08);
 }

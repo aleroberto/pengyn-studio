@@ -1,247 +1,214 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Pulse Content | Posts para Instagram com IA</title>
-
-  <link rel="stylesheet" href="styles.css" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengyn Studio - Gerador de Posts com IA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-icon">⚡</div>
-      <span>Pulse Content</span>
-    </div>
+  <main class="app-container">
+    
+    <header class="hero-section">
+      <div class="logo">pengyn<span>studio</span></div>
+      <h1>Crie <span class="dynamic-text">posts que vendem</span><span class="type-cursor">|</span> em segundos com IA</h1>
+      <p class="subtitle">Imagens ultra-realistas e exclusivas para o seu negócio se destacar no Instagram.</p>
+    </header>
 
-    <div class="secure">
-      🛡️ Pagamento 100% seguro
-    </div>
-  </header>
+    <section class="showcase-section">
+      <div class="carousel-container">
+        <div class="carousel-track">
+          
+          <div class="carousel-slide">
+            <div class="image-wrapper">
+              <img src="images/barbearia.png" alt="Exemplo Barbearia IA">
+            </div>
+            <div class="card-info">
+              <span>Barbearia Premium Estilo Clássico</span>
+            </div>
+          </div>
 
-  <main class="page">
+          <div class="carousel-slide">
+            <div class="image-wrapper">
+              <img src="images/hamburgueria.png" alt="Exemplo Hambúrguer IA">
+            </div>
+            <div class="card-info">
+              <span>Hambúrguer Gourmet Ultra-Realista</span>
+            </div>
+          </div>
 
-    <!-- HERO MOBILE FIRST -->
-    <section class="hero">
+          <div class="carousel-slide">
+            <div class="image-wrapper">
+              <img src="images/estetica.png" alt="Exemplo Estética IA">
+            </div>
+            <div class="card-info">
+              <span>Clínica de Estética de Alta Conversão</span>
+            </div>
+          </div>
 
-      <div class="badge">
-        🤖 IA + Design Profissional
+        </div>
+        
+        <div class="carousel-indicators">
+          <span class="dot active"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
       </div>
-
-      <h1>
-        Crie posts incríveis para o Instagram
-        <span>em segundos com IA</span> 🚀
-      </h1>
-
-      <p class="hero-subtitle">
-        Escolha seu nicho, estilo e quantidade. Pague e gere imagens prontas para postar.
-      </p>
-
-      <div class="benefits">
-        <div class="benefit">
-          <strong>⚡ Rápido</strong>
-          <p>Gere em segundos</p>
-        </div>
-
-        <div class="benefit">
-          <strong>🎨 Profissional</strong>
-          <p>Design de alta qualidade</p>
-        </div>
-
-        <div class="benefit">
-          <strong>📈 Eficiente</strong>
-          <p>Mais conteúdo para vender</p>
-        </div>
-      </div>
-
     </section>
 
-    <!-- PREVIEW -->
-    <section class="preview-card">
-
-      <h2>Exemplos de posts que você pode gerar:</h2>
-
-      <div class="post-grid">
-
-        <article class="post post-dark">
-          <div class="post-overlay"></div>
-
-          <div class="post-content">
-
-          </div>
-        </article>
-
-        <article class="post post-food">
-          <div class="post-overlay"></div>
-
-          <div class="post-content">
-     
-          </div>
-        </article>
-
-        <article class="post post-light">
-          <div class="post-overlay"></div>
-
-          <div class="post-content">
-
-          </div>
-        </article>
-
+    <section class="config-section">
+      <h2>1. Personalize seu Estilo</h2>
+      
+      <div class="input-group">
+        <label>Qual é o seu nicho?</label>
+        <div class="chips" id="niche-chips">
+          <button type="button" data-value="Hamburgueria" class="active">Hamburgueria</button>
+          <button type="button" data-value="Moda">Moda</button>
+          <button type="button" data-value="Estética">Estética</button>
+        </div>
       </div>
 
+      <div class="input-group">
+        <label>Estilo Visual</label>
+        <div class="chips" id="style-chips">
+          <button type="button" data-value="Premium" class="active">Premium</button>
+          <button type="button" data-value="Minimalista">Minimalista</button>
+          <button type="button" data-value="Cyberpunk">Cyberpunk</button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="main-title">Título Principal do Post</label>
+        <input type="text" id="main-title" placeholder="Ex: O melhor blend da cidade">
+      </div>
     </section>
 
-    <!-- FORM -->
-    <section class="form-card">
+    <section class="plans-section">
+      <h2>2. Escolha o seu pacote</h2>
+      
+      <div class="plans-grid">
+        <div class="plan active">
+          <div class="plan-info">
+            <strong>3 Posts</strong>
+            <span>R$ 9,90</span>
+          </div>
+        </div>
 
-      <h2>Monte seu pacote de imagens</h2>
+        <div class="plan">
+          <div class="plan-info">
+            <strong>6 Posts</strong>
+            <span>R$ 14,90</span>
+          </div>
+          <span class="badge-pop">Mais Popular</span>
+        </div>
 
-      <form>
-
-        <div class="step">
-          <div class="step-number">1</div>
-
-          <div class="step-content">
-            <h3>Escolha o nicho do seu negócio</h3>
-
-            <select id="nicho">
-              <option value="">Selecione o nicho</option>
-              <option>Barbearia</option>
-              <option>Hamburgueria</option>
-              <option>Clínica de estética</option>
-              <option>Academia</option>
-              <option>Loja feminina</option>
-              <option>Dentista</option>
-              <option>Corretor</option>
-              <option>Advogado</option>
-              <option>Psicólogo</option>
-              <option>Outro</option>
-            </select>
-
-            <div class="chips" data-target="nicho">
-              <button type="button">✂️ Barbearia</button>
-              <button type="button">🍔 Hamburgueria</button>
-              <button type="button">✨ Estética</button>
-              <button type="button">🏋️ Academia</button>
-              <button type="button">🛍️ Loja feminina</button>
-              <button type="button">🦷 Dentista</button>
+        <div class="plan">
+          <div class="plan-info">
+            <strong>12 Posts</strong>
+            <span>R$ 19,90</span>
+          </div>
+          <span class="badge-save">Melhor Valor</span>
+        </div>
+      </div>
+    </section>
+    
+    <section class="checkout-section">
+      <div class="checkout-card">
+        
+        <div class="checkout-main">
+          <div class="checkout-left">
+            <div class="receipt-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div class="receipt-text">
+              <h3>Resumo do pedido</h3>
+              <h2 id="checkout-quantity">3 imagens</h2>
+              <p>Entrega imediata</p>
+              <p>Alta qualidade</p>
+            </div>
+          </div>
+          
+          <div class="checkout-right">
+            <span class="total-label">Total</span>
+            <div class="total-price" id="checkout-price">R$ 9,90</div>
+            <div class="secure-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              Ambiente seguro
             </div>
           </div>
         </div>
 
-        <div class="step">
-          <div class="step-number">2</div>
+        <hr class="checkout-divider">
 
-          <div class="step-content">
-            <h3>Escolha o estilo das imagens</h3>
-
-            <select id="estilo">
-              <option value="">Selecione o estilo</option>
-              <option>Premium</option>
-              <option>Moderno</option>
-              <option>Dark</option>
-              <option>Minimalista</option>
-              <option>Luxo</option>
-              <option>Feminino</option>
-              <option>Tech</option>
-              <option>Pinterest</option>
-              <option>Elegante</option>
-              <option>Neon</option>
-            </select>
-
-            <div class="chips" data-target="estilo">
-              <button type="button">🏆 Premium</button>
-              <button type="button">🌆 Moderno</button>
-              <button type="button">🌑 Dark</button>
-              <button type="button">◻️ Minimalista</button>
-              <button type="button">🔥 Luxo</button>
-              <button type="button">🌸 Feminino</button>
-            </div>
+        <div class="client-data-group">
+          <h3>Seus Dados</h3>
+          <div class="checkout-input-wrapper">
+            <input type="text" id="client-instagram" placeholder="Link do Perfil do Instagram (em modo Público)" required>
+          </div>
+          <div class="checkout-input-wrapper">
+            <input type="tel" id="client-whatsapp" placeholder="Seu WhatsApp com DDD" required>
+          </div>
+          <div class="checkout-input-wrapper">
+            <input type="email" id="client-email" placeholder="Seu melhor e-mail" required>
           </div>
         </div>
 
-        <div class="step">
-          <div class="step-number">3</div>
+        <hr class="checkout-divider">
 
-          <div class="step-content">
-            <h3>Quantidade de imagens</h3>
-
-            <div class="plans">
-              <button type="button" class="plan active" data-qtd="3" data-price="9.90">
-                <strong>3 imagens</strong>
-                <span>R$ 9,90</span>
-              </button>
-
-              <button type="button" class="plan" data-qtd="5" data-price="14.90">
-                <strong>5 imagens</strong>
-                <span>R$ 14,90</span>
-              </button>
-
-              <button type="button" class="plan" data-qtd="10" data-price="24.90">
-                <strong>10 imagens</strong>
-                <span>R$ 24,90</span>
-              </button>
-            </div>
+        <div class="payment-methods">
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <path d="M7 .5L.5 7 7 13.5 13.5 7 7 .5zm0 2.5L11 7 7 11 3 7l4-4z" fill="#32BCAD"/>
+              <text x="17" y="10.5" fill="#32BCAD" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="8.5" letter-spacing="0.2">pix</text>
+            </svg>
+          </div>
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <text x="5" y="11" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-style="italic" font-size="11" letter-spacing="0.5">VISA</text>
+            </svg>
+          </div>
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <circle cx="16" cy="7" r="5.5" fill="#EB001B"/>
+              <circle cx="24" cy="7" r="5.5" fill="#F79E1B" opacity="0.85"/>
+            </svg>
+          </div>
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <text x="6" y="10.5" fill="#00A4E4" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="11" letter-spacing="0.2">elo</text>
+              <circle cx="29" cy="5" r="2" fill="#EF4123"/>
+            </svg>
+          </div>
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <rect x="2" y="1" width="36" height="12" rx="2" fill="#017CC2"/>
+              <text x="5" y="10" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="7" letter-spacing="0.3">AMEX</text>
+            </svg>
+          </div>
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <path d="M6 9.5c-.3.4-.6.8-1 1-.4.0-.5-.2-.9-.2s-.5.2-.9.2c-.4 0-.7-.4-1-1C1.5 8 1.1 6.5 1.7 5.5c.3-.5.8-.8 1.3-.8.3 0 .6.2.8.2.2 0 .6-.2.9-.2.2 0 .8.1 1.2.6-.1.0-.7.4-.7 1.3 0 1 .8 1.4.8 1.4-.1.1-.2.5-.5.9M5 4c.2-.3.3-.7.3-1-.3 0-.7.2-.9.4-.2.2-.3.6-.2 1 .3 0 .6-.2.8-.4" fill="#FFFFFF"/>
+              <text x="12" y="10.5" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="9">Pay</text>
+            </svg>
           </div>
         </div>
 
-        <div class="step">
-          <div class="step-number">4</div>
-
-          <div class="step-content">
-            <h3>Conteúdo do seu post</h3>
-
-            <label for="titulo">Título principal</label>
-            <input
-              id="titulo"
-              type="text"
-              placeholder="Ex: Promoção de corte masculino"
-            />
-
-            <label for="texto">Texto complementar <span>(opcional)</span></label>
-            <input
-              id="texto"
-              type="text"
-              placeholder="Ex: Agende hoje com desconto especial"
-            />
-          </div>
-        </div>
-
-        <div class="checkout-card">
-          <div class="summary-icon">📄</div>
-
-          <div class="summary">
-            <span>Resumo do pedido</span>
-            <strong id="summaryQtd">3 imagens</strong>
-            <small>Entrega imediata · Alta qualidade</small>
-          </div>
-
-          <div class="total">
-            <span>Total</span>
-            <strong id="summaryPrice">R$ 9,90</strong>
-            <small>🔒 Ambiente seguro</small>
-          </div>
-        </div>
-
-        <button type="button" class="pay-button" id="payButton">
-          Continuar para o pagamento →
-        </button>
-
-      </form>
-
+      </div>
+      
+      <button type="button" class="pay-button">
+        Gerar Posts com IA
+      </button>
     </section>
 
   </main>
+
+  <a href="https://wa.me/5511967858493" class="whatsapp-sticky" target="_blank" rel="noopener noreferrer" aria-label="Fale conosco pelo WhatsApp">
+    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.288 1.488 4.653 1.489 5.4 0 9.793-4.393 9.796-9.797.002-2.592-1.01-5.029-2.853-6.874C16.35 2.126 13.917 1.114 11.33 1.114c-5.4 0-9.793 4.393-9.797 9.797-.001 1.417.509 2.801 1.474 4.016L2.081 21.18l4.566-1.196zm11.39-4.88c-.285-.143-1.688-.833-1.948-.928-.26-.095-.45-.143-.64.143-.19.285-.736.928-.903 1.117-.166.19-.333.214-.618.071-1.24-.622-2.143-1.09-2.984-2.533-.223-.383.223-.356.638-1.186.071-.143.036-.268-.018-.38-.054-.113-.45-1.083-.617-1.487-.162-.395-.34-.34-.468-.346-.121-.005-.26-.006-.4-.006-.14 0-.368.052-.56.26-.192.208-.732.716-.732 1.747s.75 2.027.855 2.169c.105.142 1.476 2.254 3.577 3.16.5.216.89.345 1.196.442.503.16 1.054.137 1.451.078.443-.066 1.688-.69 1.926-1.356.238-.665.238-1.235.166-1.356-.07-.12-.26-.193-.546-.336z"/></a
+  >
 
   <script src="script.js"></script>
 </body>

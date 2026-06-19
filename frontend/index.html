@@ -13,51 +13,45 @@
 
   <main class="app-container">
     
-    <!-- HEADER / HERO -->
     <header class="hero-section">
       <div class="logo">pengyn<span>studio</span></div>
-      <h1>Crie posts que vendem em segundos com IA</h1>
+      <h1>Crie <span class="dynamic-text">posts que vendem</span><span class="type-cursor">|</span> em segundos com IA</h1>
       <p class="subtitle">Imagens ultra-realistas e exclusivas para o seu negócio se destacar no Instagram.</p>
     </header>
 
-<!-- VITRINE DE PRODUTO (CARROSSEL DE 3 IMAGENS) -->
     <section class="showcase-section">
       <div class="carousel-container">
         <div class="carousel-track">
           
-          <!-- Imagem 1: Hambúrguer -->
           <div class="carousel-slide">
             <div class="image-wrapper">
-              <img src="images/barbearia.png" alt="Exemplo Hambúrguer IA">
+              <img src="images/barbearia.png" alt="Exemplo Barbearia IA">
+            </div>
+            <div class="card-info">
+              <span>Barbearia Premium Estilo Clássico</span>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="image-wrapper">
+              <img src="images/hamburgueria.png" alt="Exemplo Hambúrguer IA">
             </div>
             <div class="card-info">
               <span>Hambúrguer Gourmet Ultra-Realista</span>
             </div>
           </div>
 
-          <!-- Imagem 2: Segunda Imagem -->
           <div class="carousel-slide">
             <div class="image-wrapper">
-              <img src="images/hamburgueria.png" alt="Exemplo IA 2">
+              <img src="images/estetica.png" alt="Exemplo Estética IA">
             </div>
             <div class="card-info">
-              <span>Designs Exclusivos para seu Nicho</span>
-            </div>
-          </div>
-
-          <!-- Imagem 3: Terceira Imagem -->
-          <div class="carousel-slide">
-            <div class="image-wrapper">
-              <img src="images/estetica.png" alt="Exemplo IA 3">
-            </div>
-            <div class="card-info">
-              <span>Alta Conversão para Instagram</span>
+              <span>Clínica de Estética de Alta Conversão</span>
             </div>
           </div>
 
         </div>
         
-        <!-- Indicadores (Pontinhos) do Carrossel -->
         <div class="carousel-indicators">
           <span class="dot active"></span>
           <span class="dot"></span>
@@ -66,11 +60,9 @@
       </div>
     </section>
 
-    <!-- FORMULÁRIO DE CONFIGURAÇÃO -->
     <section class="config-section">
       <h2>1. Personalize seu Estilo</h2>
       
-      <!-- Seletor de Nicho usando Chips -->
       <div class="input-group">
         <label>Qual é o seu nicho?</label>
         <div class="chips" id="niche-chips">
@@ -80,7 +72,6 @@
         </div>
       </div>
 
-      <!-- Seletor de Estilo usando Chips -->
       <div class="input-group">
         <label>Estilo Visual</label>
         <div class="chips" id="style-chips">
@@ -90,40 +81,122 @@
         </div>
       </div>
 
-      <!-- Título Principal -->
       <div class="input-group">
         <label for="main-title">Título Principal do Post</label>
         <input type="text" id="main-title" placeholder="Ex: O melhor blend da cidade">
       </div>
     </section>
 
-    <!-- SELEÇÃO DE PLANOS -->
     <section class="plans-section">
-      <h2>2. Escolha a quantidade</h2>
+      <h2>2. Escolha o seu pacote</h2>
       
       <div class="plans-grid">
-        <div class="plan active" data-quantity="30 Posts" data-price="R$ 49,90">
+        <div class="plan active">
           <div class="plan-info">
-            <strong>30 Posts</strong>
-            <span>Imagens em alta definição</span>
+            <strong>3 Posts</strong>
+            <span>R$ 9,90</span>
           </div>
-          <div class="plan-price">R$ 49,90</div>
         </div>
 
-        <div class="plan" data-quantity="60 Posts" data-price="R$ 79,90">
+        <div class="plan">
           <div class="plan-info">
-            <strong>60 Posts</strong>
-            <span>Melhor custo-benefício</span>
+            <strong>6 Posts</strong>
+            <span>R$ 14,90</span>
           </div>
-          <div class="plan-price">R$ 79,90</div>
+          <span class="badge-pop">Mais Popular</span>
+        </div>
+
+        <div class="plan">
+          <div class="plan-info">
+            <strong>12 Posts</strong>
+            <span>R$ 19,90</span>
+          </div>
+          <span class="badge-save">Melhor Valor</span>
         </div>
       </div>
     </section>
-
-    <!-- RESUMO DO PEDIDO -->
+    
     <section class="checkout-section">
       <div class="checkout-card">
-        <!-- Injetado dinamicamente via JS -->
+        
+        <div class="checkout-main">
+          <div class="checkout-left">
+            <div class="receipt-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div class="receipt-text">
+              <h3>Resumo do pedido</h3>
+              <h2 id="checkout-quantity">3 imagens</h2>
+              <p>Entrega imediata</p>
+              <p>Alta qualidade</p>
+            </div>
+          </div>
+          
+          <div class="checkout-right">
+            <span class="total-label">Total</span>
+            <div class="total-price" id="checkout-price">R$ 9,90</div>
+            <div class="secure-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              Ambiente seguro
+            </div>
+          </div>
+        </div>
+
+        <hr class="checkout-divider">
+
+        <div class="client-data-group">
+          <h3>Seus Dados</h3>
+          <div class="checkout-input-wrapper">
+            <input type="text" id="client-instagram" placeholder="Link do Perfil do Instagram (em modo Público)" required>
+          </div>
+          <div class="checkout-input-wrapper">
+            <input type="tel" id="client-whatsapp" placeholder="Seu WhatsApp com DDD" required>
+          </div>
+          <div class="checkout-input-wrapper">
+            <input type="email" id="client-email" placeholder="Seu melhor e-mail" required>
+          </div>
+        </div>
+
+        <hr class="checkout-divider">
+
+        <div class="payment-methods">
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <path d="M7 .5L.5 7 7 13.5 13.5 7 7 .5zm0 2.5L11 7 7 11 3 7l4-4z" fill="#32BCAD"/>
+              <text x="17" y="10.5" fill="#32BCAD" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="8.5" letter-spacing="0.2">pix</text>
+            </svg>
+          </div>
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <text x="5" y="11" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-style="italic" font-size="11" letter-spacing="0.5">VISA</text>
+            </svg>
+          </div>
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <circle cx="16" cy="7" r="5.5" fill="#EB001B"/>
+              <circle cx="24" cy="7" r="5.5" fill="#F79E1B" opacity="0.85"/>
+            </svg>
+          </div>
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <text x="6" y="10.5" fill="#00A4E4" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="11" letter-spacing="0.2">elo</text>
+              <circle cx="29" cy="5" r="2" fill="#EF4123"/>
+            </svg>
+          </div>
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <rect x="2" y="1" width="36" height="12" rx="2" fill="#017CC2"/>
+              <text x="5" y="10" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="7" letter-spacing="0.3">AMEX</text>
+            </svg>
+          </div>
+          <div class="method-card">
+            <svg viewBox="0 0 40 14" width="100%" height="100%">
+              <path d="M6 9.5c-.3.4-.6.8-1 1-.4.0-.5-.2-.9-.2s-.5.2-.9.2c-.4 0-.7-.4-1-1C1.5 8 1.1 6.5 1.7 5.5c.3-.5.8-.8 1.3-.8.3 0 .6.2.8.2.2 0 .6-.2.9-.2.2 0 .8.1 1.2.6-.1.0-.7.4-.7 1.3 0 1 .8 1.4.8 1.4-.1.1-.2.5-.5.9M5 4c.2-.3.3-.7.3-1-.3 0-.7.2-.9.4-.2.2-.3.6-.2 1 .3 0 .6-.2.8-.4" fill="#FFFFFF"/>
+              <text x="12" y="10.5" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="9">Pay</text>
+            </svg>
+          </div>
+        </div>
+
       </div>
       
       <button type="button" class="pay-button">
@@ -132,6 +205,10 @@
     </section>
 
   </main>
+
+  <a href="https://wa.me/5511967858493" class="whatsapp-sticky" target="_blank" rel="noopener noreferrer" aria-label="Fale conosco pelo WhatsApp">
+    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-4.846c1.66.986 3.288 1.488 4.653 1.489 5.4 0 9.793-4.393 9.796-9.797.002-2.592-1.01-5.029-2.853-6.874C16.35 2.126 13.917 1.114 11.33 1.114c-5.4 0-9.793 4.393-9.797 9.797-.001 1.417.509 2.801 1.474 4.016L2.081 21.18l4.566-1.196zm11.39-4.88c-.285-.143-1.688-.833-1.948-.928-.26-.095-.45-.143-.64.143-.19.285-.736.928-.903 1.117-.166.19-.333.214-.618.071-1.24-.622-2.143-1.09-2.984-2.533-.223-.383.223-.356.638-1.186.071-.143.036-.268-.018-.38-.054-.113-.45-1.083-.617-1.487-.162-.395-.34-.34-.468-.346-.121-.005-.26-.006-.4-.006-.14 0-.368.052-.56.26-.192.208-.732.716-.732 1.747s.75 2.027.855 2.169c.105.142 1.476 2.254 3.577 3.16.5.216.89.345 1.196.442.503.16 1.054.137 1.451.078.443-.066 1.688-.69 1.926-1.356.238-.665.238-1.235.166-1.356-.07-.12-.26-.193-.546-.336z"/></a
+  >
 
   <script src="script.js"></script>
 </body>

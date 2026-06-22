@@ -2,6 +2,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 import uvicorn
+from services.ia_service import IAService
+from services.instagram_service import InstagramService
+
+instagram_service = InstagramService()
+ia_service = IAService()
 
 app = FastAPI(
     title="Pengyn Studio API",
@@ -9,7 +14,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configuração do CORS para o Frontend se conectar localmente sem travar
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Em produção, substituiremos pelo domínio da Vercel
@@ -51,47 +55,49 @@ class CheckoutPayload(BaseModel):
 def read_root():
     return {"status": "online", "message": "Bem-vindo à API do Pengyn Studio!"}
 
+# 3. Atualize a rota antiga por esta:
 @app.post("/api/v1/validate-instagram")
 async def validate_instagram(request: ProfileValidationRequest):
     """
-    Rota rápida para verificar se o perfil do Instagram existe e está público.
+    Verifica em tempo real se o perfil do Instagram existe e está público.
     """
-    clean_username = request.username.strip().replace("@", "").split("/")[-1]
-    
-    if not clean_username or clean_username.lower() == "null":
-        raise HTTPException(status_code=400, detail="Nome de usuário inválido.")
-    
-    # Mock inicial de validação simunlando o comportamento do Redis/API
-    # Se digitar apenas números ou "erro", simulamos o comportamento de perfil não encontrado
-    if clean_username.isdigit() or clean_username.lower() == "erro":
-        return {
-            "valid": False, 
-            "message": "Perfil não foi encontrado, verifique se digitou corretamente."
-        }
-        
-    return {
-        "valid": True, 
-        "username": clean_username, 
-        "message": "Perfil validado com sucesso!"
-    }
+    result = await instagram_service.validate_profile(request.username)
+    return result
 
+    
 @app.post("/api/v1/checkout")
 async def create_checkout(payload: CheckoutPayload):
     """
-    Recebe o payload completo do frontend para iniciar o processo de pagamento e IA.
+    Recebe o payload completo do frontend e aciona a geração de imagens via IA.
     """
     print(f"Recebendo pedido de {payload.client.email} para o plano de {payload.purchase.quantity}")
     
-    # Aqui entrará a lógica do webhook da Juno/MercadoPago e a fila do Celery/Background Tasks
+    # Aciona o motor de serviço assíncrono que criamos
+    ia_result = await ia_service.generate_post_image(
+        niche=payload.config.niche,
+        style=payload.config.style,
+        title=payload.config.title
+    )
+    
+    if ia_result["status"] == "error":
+        raise HTTPException(status_code=500, detail=ia_result["message"])
+        
     return {
         "success": True,
-        "message": "Payload recebido! Aguardando confirmação de pagamento para iniciar geração via IA.",
+        "message": "Imagens geradas com sucesso via Inteligência Artificial!",
         "order_summary": {
             "client_email": payload.client.email,
             "items": payload.purchase.quantity,
             "total": payload.purchase.price
-        }
+        },
+        "generated_assets": [
+            {
+                "type": "image",
+                "url": ia_result["image_url"]
+            }
+        ]
     }
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    

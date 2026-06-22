@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!usernameValue) return;
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/v1/validate-instagram", {
+        const response = await fetch("https://pengyn-studio-api.vercel.app/api/v1/validate-instagram", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: usernameValue })
@@ -76,6 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyInstagramError(message) {
     if (!instagramInput) return;
+    removeInstagramError(); // Limpa erros antigos para evitar duplicação visual no DOM
+
     instagramInput.style.borderColor = "#EF4444";
     instagramInput.style.boxShadow = "0 0 0 2px rgba(239, 68, 68, 0.15)";
     
@@ -262,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("ENVIANDO REQUISIÇÃO REAL PARA O FASTAPI:", checkoutPayload);
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/v1/checkout", {
+        const response = await fetch("https://pengyn-studio-api.vercel.app/api/v1/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(checkoutPayload)

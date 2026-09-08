@@ -230,6 +230,14 @@ section {
   margin-top: 48px;
 }
 
+/* Alternância automática entre seções */
+main > section:nth-of-type(even),
+body > section:nth-of-type(even) {
+  background-color: rgba(255, 255, 255, 0.015);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
 .metric-card {
   background: rgba(17, 24, 39, 0.4);
   border: 1px solid var(--border);

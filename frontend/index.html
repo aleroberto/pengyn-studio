@@ -3,177 +3,490 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pengyn Studio - Gerador de Posts com IA</title>
+
+  <title>Pengyn Studio</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-</head>
+
 <body>
 
-  <main class="app-container">
-    
-    <header class="hero-section">
-      <div class="logo">pengyn<span>studio</span></div>
-      <h1>Crie <span class="dynamic-text">posts que vendem</span><span class="type-cursor">|</span> em segundos com IA</h1>
-      <p class="subtitle">Imagens ultra-realistas e exclusivas para o seu negócio se destacar no Instagram.</p>
-    </header>
+  <!-- BACKGROUND GLOW -->
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
 
-    <section class="showcase-section">
-      <div class="carousel-container">
-        <div class="carousel-track">
-          
-          <div class="carousel-slide">
-            <div class="image-wrapper">
-              <img src="images/barbearia.png" alt="Exemplo Barbearia IA">
-            </div>
-            <div class="card-info">
-              <span>Barbearia Premium Estilo Clássico</span>
-            </div>
-          </div>
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="container nav-wrapper">
 
-          <div class="carousel-slide">
-            <div class="image-wrapper">
-              <img src="images/hamburgueria.png" alt="Exemplo Hambúrguer IA">
-            </div>
-            <div class="card-info">
-              <span>Hambúrguer Gourmet Ultra-Realista</span>
-            </div>
-          </div>
+      <div class="logo" id="logo-top">
+        pengyn<span>studio</span>
+      </div>
 
-          <div class="carousel-slide">
-            <div class="image-wrapper">
-              <img src="images/estetica.png" alt="Exemplo Estética IA">
-            </div>
-            <div class="card-info">
-              <span>Clínica de Estética de Alta Conversão</span>
-            </div>
-          </div>
+      <nav class="nav-links">
+        <a href="#benefits">Benefícios</a>
+        <a href="#showcase">Exemplos</a>
+        <a href="#how-it-works">Como Funciona</a>
+        <a href="#onboarding">Planos</a>
+        <a href="#faq">FAQ</a>
+      </nav>
 
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-content reveal">
+
+        <h1>
+          Crie <span class="dynamic-text">posts que vendem</span><br> em segundos com IA
+        </h1>
+
+        <p class="hero-subtitle">
+          Gere artes ultra-realistas para Instagram em segundos.
+          Sem designer. Sem complicação.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#onboarding" class="primary-button">
+            Gerar meus posts
+          </a>
+          <a href="#showcase" class="secondary-button">
+            Ver exemplos
+          </a>
         </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF PREMIUM -->
+  <section class="social-proof reveal">
+    <div class="container">
+      <div class="proof-header">
+        <span class="section-tag">
+          RESULTADOS REAIS
+        </span>
+        <h2>
+          Negócios reais usando IA para crescer no Instagram.
+        </h2>
+        <p>
+          Criado para marcas que precisam chamar atenção,
+          vender mais e parecer premium nas redes sociais.
+        </p>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <h3>3–12</h3>
+          <span>Posts por pacote</span>
+        </div>
+        <div class="metric-card">
+          <h3>1:1</h3>
+          <span>Formato do Instagram</span>
+        </div>
+        <div class="metric-card">
+          <h3>PIX</h3>
+          <span>Confirmação instantânea</span>
+        </div>
+        <div class="metric-card">
+          <h3>Segundos</h3>
+          <span>Geração em segundos</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section id="benefits" class="benefits">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">
+          BENEFÍCIOS
+        </span>
+        <h2>
+          Tudo que você precisa para criar posts que vendem.
+        </h2>
+      </div>
+
+      <div class="benefits-grid">
+        <div class="benefit-card reveal">
+          <h3>Visual Premium</h3>
+          <p>
+            Imagens ultra-realistas com aparência de campanhas profissionais.
+          </p>
+        </div>
+        <div class="benefit-card reveal">
+          <h3>Entrega Instantânea</h3>
+          <p>
+            Gere seus posts em segundos sem depender de designers.
+          </p>
+        </div>
+        <div class="benefit-card reveal">
+          <h3>Alta Conversão</h3>
+          <p>
+            Designs criados para chamar atenção e aumentar vendas.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOWCASE -->
+  <section id="showcase" class="showcase">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">
+          EXEMPLOS
+        </span>
+        <h2>
+          Resultados gerados pela Pengyn Studio.
+        </h2>
+      </div>
+
+      <div class="showcase-grid">
+
+          <div class="showcase-card reveal">
+          <img src="images/barbearia.jfif" alt="Exemplo Barbearia">
+        </div>
+
+
+          <div class="showcase-card reveal">
+          <img src="images/estetica.jfif" alt="Exemplo Estética">
+        </div>
+
+ 
+      
+             <div class="showcase-card reveal">
+          <img src="images/hamburgueria.jpg" alt="Exemplo Hamburgueria">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works" class="how-it-works">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">PASSO A PASSO</span>
+        <h2>Como funciona o <span class="brand-text">pengyn<span>studio</span></span></h2>
+        <p class="section-subtitle">
+          Em poucos cliques você estrutura o posicionamento da sua marca e recebe suas artes geradas por IA.
+        </p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card reveal">
+          <div class="step-number">01</div>
+          <div class="step-icon">🎯</div>
+          <h3>Defina sua Marca</h3>
+          <p>Selecione seu nicho de atuação, o objetivo central das publicações e a linha estética desejada.</p>
+        </div>
+
+        <div class="step-card reveal">
+          <div class="step-number">02</div>
+          <div class="step-icon">📦</div>
+          <h3>Escolha o Pacote</h3>
+          <p>Defina o volume ideal para o seu perfil (3, 6 ou 12 posts) de acordo com a frequência que precisa.</p>
+        </div>
+
+        <div class="step-card reveal">
+          <div class="step-number">03</div>
+          <div class="step-icon">⚡</div>
+          <h3>Receba a Estratégia</h3>
+          <p>Nossa IA projeta na hora o roteiro narrativo sob medida com cada post estruturado para conversão.</p>
+        </div>
+
+        <div class="step-card reveal">
+          <div class="step-number">04</div>
+          <div class="step-icon">🚀</div>
+          <h3>Contrate & Gere com IA</h3>
+          <p>Gere o código PIX para liberação instantânea e acompanhe suas imagens ultra-realistas sendo renderizadas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ONBOARDING (ENGINE) -->
+  <section id="onboarding" class="onboarding">
+    <div class="container reveal">
+      <div class="cta-box">
         
-        <div class="carousel-indicators">
-          <span class="dot active"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-        </div>
-      </div>
-    </section>
-
-    <section class="config-section">
-      <h2>1. Personalize seu Estilo</h2>
-      
-      <div class="input-group">
-        <label>Qual é o seu nicho?</label>
-        <div class="chips" id="niche-chips">
-          <button type="button" data-value="Hamburgueria" class="active">Hamburgueria</button>
-          <button type="button" data-value="Moda">Moda</button>
-          <button type="button" data-value="Estética">Estética</button>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label>Estilo Visual</label>
-        <div class="chips" id="style-chips">
-          <button type="button" data-value="Premium" class="active">Premium</button>
-          <button type="button" data-value="Minimalista">Minimalista</button>
-          <button type="button" data-value="Cyberpunk">Cyberpunk</button>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label for="main-title">Título Principal do Post</label>
-        <input type="text" id="main-title" placeholder="Ex: O melhor blend da cidade">
-      </div>
-    </section>
-
-    <section class="plans-section">
-      <h2>2. Escolha o seu pacote</h2>
-      
-      <div class="plans-grid">
-        <div class="plan active">
-          <div class="plan-info">
-            <strong>3 Posts</strong>
-            <span>R$ 9,90</span>
+        <div class="engine-topbar">
+          <div class="engine-status">
+            <span class="pulse-dot"></span> Demo local
+          </div>
+          <div class="engine-version">
+            Pengyn Engine v2
           </div>
         </div>
 
-        <div class="plan">
-          <div class="plan-info">
-            <strong>6 Posts</strong>
-            <span>R$ 14,90</span>
-          </div>
-          <span class="badge-pop">Mais Popular</span>
+        <h2>Vamos montar sua estratégia ideal.</h2>
+        <p style="margin-bottom: 24px;">
+          Responda rapidamente e nossa IA recomendará os melhores posts para seu negócio.
+        </p>
+
+        <div class="step-indicator" style="font-weight: 600; color: var(--primary); margin-bottom: 12px; font-size: 0.9rem;">
+          Etapa 1 de 4
         </div>
 
-        <div class="plan">
-          <div class="plan-info">
-            <strong>12 Posts</strong>
-            <span>R$ 19,90</span>
-          </div>
-          <span class="badge-save">Melhor Valor</span>
+        <div class="progress-bar" style="max-width: 600px; margin: 0 auto 40px;">
+          <div class="progress"></div>
         </div>
-      </div>
-    </section>
-    
-    <section class="checkout-section">
-      <div class="checkout-card">
-        
-        <div class="checkout-main">
-          <div class="checkout-left">
-            <div class="receipt-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            </div>
-            <div class="receipt-text">
-              <h3>Resumo do pedido</h3>
-              <h2 id="checkout-quantity">3 imagens</h2>
-              <p>Entrega imediata</p>
-              <p>Alta qualidade</p>
-            </div>
-          </div>
+
+        <div class="questions-wrapper" style="position: relative; min-height: 180px;">
           
-          <div class="checkout-right">
-            <span class="total-label">Total</span>
-            <div class="total-price" id="checkout-price">R$ 9,90</div>
-            <div class="secure-badge">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              Ambiente seguro
+          <div class="question-block" data-step="1">
+            <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Qual é o seu nicho?</h3>
+            <div class="chips">
+              <button data-value="hamburgueria">Hamburgueria</button>
+              <button data-value="barbearia">Barbearia</button>
+              <button data-value="estetica">Estética</button>
+              <button data-value="moda">Moda</button>
+              <button data-value="restaurante">Restaurante</button>
             </div>
           </div>
+
+          <div class="question-block hidden" data-step="2">
+            <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Qual seu objetivo principal?</h3>
+            <div class="chips">
+              <button data-value="vendas">Mais vendas</button>
+              <button data-value="clientes">Atrair clientes</button>
+              <button data-value="autoridade">Criar autoridade</button>
+              <button data-value="whatsapp">Mensagens no WhatsApp</button>
+            </div>
+          </div>
+
+          <div class="question-block hidden" data-step="3">
+            <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Qual estilo visual representa sua marca?</h3>
+            <div class="chips">
+              <button data-value="premium">Premium</button>
+              <button data-value="minimalista">Minimalista</button>
+              <button data-value="luxo">Luxo</button>
+              <button data-value="vibrante">Vibrante</button>
+            </div>
+          </div>
+
+          <div class="question-block hidden" data-step="4">
+            <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Escolha seu pacote ideal.</h3>
+            <div class="pricing-grid-onboarding">
+              <div class="price-card-onboarding">
+                <h3>Starter</h3>
+                <div class="price">R$ 9,90</div>
+                <p>3 posts premium</p>
+                <button type="button" class="plan-cta-onboarding" data-quantity="3">Escolher plano</button>
+              </div>
+
+              <div class="price-card-onboarding featured">
+                <div class="featured-badge">MAIS POPULAR</div>
+                <h3>Professional</h3>
+                <div class="price">R$ 14,90</div>
+                <p>6 posts premium</p>
+                <button type="button" class="plan-cta-onboarding" data-quantity="6">Escolher plano</button>
+              </div>
+
+              <div class="price-card-onboarding">
+                <h3>Business</h3>
+                <div class="price">R$ 19,90</div>
+                <p>12 posts premium</p>
+                <button type="button" class="plan-cta-onboarding" data-quantity="12">Escolher plano</button>
+              </div>
+            </div>
+          </div>
+
         </div>
 
-        <hr class="checkout-divider">
+        <div id="loading-state" class="hidden">
+          <div class="loader"></div>
+          <p style="font-weight: 600; color: var(--primary);">Estruturando pacote ideal...</p>
+        </div>
 
-        <div class="client-data-group">
-          <h3>Seus Dados</h3>
-          <div class="checkout-input-wrapper">
-            <input type="text" id="client-instagram" placeholder="Nome de usuário do Instagram" required>
+        <div id="result-card" class="result-card hidden">
+          <h2>Estratégia recomendada</h2>
+          <p class="subtitle">
+            Criamos a sequência exata para o seu pacote escolhido.
+          </p>
+
+          <div class="strategy-context">
+            <div><strong>Objetivo:</strong> <span id="out-goal">-</span></div>
+            <div><strong>Nicho:</strong> <span id="out-niche">-</span></div>
+            <div><strong>Pacote:</strong> <span id="out-quantity">-</span></div>
           </div>
-          <div class="checkout-input-wrapper">
-            <input type="tel" id="client-whatsapp" placeholder="Seu WhatsApp com DDD" required>
+
+          <div class="strategy-grid" id="dynamic-grid">
+            <!-- Cards injetados via JS -->
           </div>
-          <div class="checkout-input-wrapper">
-            <input type="email" id="client-email" placeholder="Seu melhor e-mail" required>
+
+          <!-- NOVOS BOTÕES DE AÇÃO DA ENGINE -->
+          <div class="result-actions">
+            <button type="button" id="btn-checkout" class="primary-button">Contratar Pacote</button>
+            <button type="button" id="btn-restart" class="secondary-button">Refazer Estratégia</button>
+          </div>
+
+          <div id="checkout-panel" class="flow-panel hidden">
+            <h3>Dados para o pedido</h3>
+            <p class="flow-note">Usamos esses campos só para montar o checkout. Nada é enviado por WhatsApp ou e-mail.</p>
+            <form id="checkout-form">
+              <label>
+                Instagram
+                <input type="text" id="client-instagram" name="instagram" required maxlength="80" placeholder="@sua_marca" autocomplete="username">
+              </label>
+              <label>
+                WhatsApp
+                <input type="tel" id="client-whatsapp" name="whatsapp" required inputmode="numeric" placeholder="(11) 99999-9999" autocomplete="tel">
+              </label>
+              <label>
+                E-mail
+                <input type="email" id="client-email" name="email" required placeholder="voce@email.com" autocomplete="email">
+              </label>
+              <p id="checkout-error" class="form-error hidden" role="alert"></p>
+              <button type="submit" id="btn-submit-checkout" class="primary-button">Gerar PIX de demonstração</button>
+            </form>
+          </div>
+
+          <div id="pix-panel" class="flow-panel hidden">
+            <h3>PIX de demonstração</h3>
+            <p class="flow-note">Este código <strong>não é pagável</strong>. É uma simulação local para avançar o fluxo.</p>
+            <p class="pix-meta">Transação: <span id="out-transaction-id">-</span></p>
+            <textarea id="out-pix-code" readonly rows="4"></textarea>
+            <div class="pix-actions">
+              <button type="button" id="btn-copy-pix" class="secondary-button">Copiar código</button>
+              <button type="button" id="btn-simulate-payment" class="primary-button">Simular pagamento aprovado</button>
+            </div>
+            <p id="pix-error" class="form-error hidden" role="alert"></p>
+          </div>
+
+          <div id="delivery-panel" class="flow-panel hidden">
+            <h3>Artes do pacote</h3>
+            <p class="flow-note">Cada card da estratégia vira uma imagem mock nesta demo. Sem envio por e-mail ou WhatsApp.</p>
+            <div id="delivery-gallery" class="delivery-gallery"></div>
           </div>
         </div>
 
-        <hr class="checkout-divider">
+      </div>
+    </div>
+  </section>
 
+  
 
-      
-      <button type="button" class="pay-button">
-        Gerar Posts com IA
-      </button>
-    </section>
+  <!-- FAQ -->
+  <section id="faq" class="faq">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">
+          FAQ
+        </span>
+        <h2>
+          Perguntas frequentes.
+        </h2>
+      </div>
 
-  </main>
+      <div class="faq-list">
+        <div class="faq-item reveal">
+          <button class="faq-question">
+            Como recebo os posts?
+          </button>
+          <div class="faq-answer">
+            <p>Nesta demo, após simular o pagamento aprovado as imagens mock aparecem na tela. Não há envio por e-mail ou WhatsApp.</p>
+          </div>
+        </div>
 
-<a href="https://wa.me/5511967858493" class="whatsapp-sticky" target="_blank" rel="noopener noreferrer" aria-label="Fale conosco pelo WhatsApp">
-    <i class="fa-brands fa-whatsapp"></i>
+        <div class="faq-item reveal">
+          <button class="faq-question">
+            As imagens são exclusivas?
+          </button>
+          <div class="faq-answer">
+            <p>O produto promete gerações personalizadas. Nesta demo usamos imagens ilustrativas para validar o fluxo completo de pedido.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-question">
+            O PIX é real?
+          </button>
+          <div class="faq-answer">
+            <p>Não. O código é fictício e o botão “Simular pagamento aprovado” só existe para testar a entrega sem gateway.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        
+        <!-- Coluna 1 - Pengyn Studio -->
+        <div class="footer-col">
+          <div class="footer-logo">
+            pengyn<span>studio</span>
+          </div>
+          <p class="footer-description">
+            Crie imagens e conteúdos profissionais com inteligência artificial.
+          </p>
+        </div>
+
+        <!-- Coluna 2 - Produto -->
+        <div class="footer-col">
+          <h4>Produto</h4>
+          <ul class="footer-links">
+            <li><a href="#">Início</a></li>
+            <li><a href="#how-it-works">Como Funciona</a></li>
+            <li><a href="#onboarding">Planos</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+
+        <!-- Coluna 3 - Legal -->
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul class="footer-links">
+            <li><a href="legal/terms.html" id="terms-link">Termos de Uso</a></li>
+            <li><a href="legal/privacy.html" id="privacy-link">Política de Privacidade</a></li>
+            <li><a href="legal/cookies.html" id="cookies-link">Política de Cookies</a></li>
+            <li><a href="legal/refund.html" id="refund-link">Cancelamento e Reembolso</a></li>
+          </ul>
+        </div>
+
+        <!-- Coluna 4 - Atendimento -->
+        <div class="footer-col">
+          <h4>Atendimento</h4>
+          <ul class="footer-links">
+            <li>
+              <a href="https://wa.me/5511967858493" target="_blank" rel="noopener noreferrer">
+                WhatsApp: +55 11 96785-8493
+              </a>
+            </li>
+            <li><a href="mailto:contato@pengynstudio.com">contato@pengynstudio.com</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Pengyn Studio. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WHATSAPP FLOATING BUTTON -->
+  <a href="https://wa.me/5511967858493?text=Olá!%20Vim%20pelo%20Pengyn%20Studio%20e%20gostaria%20de%20saber%20mais%20sobre%20os%20planos." 
+     class="whatsapp-float" 
+     target="_blank" 
+     rel="noopener noreferrer"
+     aria-label="Contato via WhatsApp">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+    </svg>
   </a>
 
   <script src="script.js"></script>
+
 </body>
 </html>

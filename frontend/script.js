@@ -877,6 +877,8 @@ document.addEventListener("DOMContentLoaded", () => {
       checkoutForm.reset();
     }
     sessionStorage.removeItem("pengyn_order");
+    document.getElementById("result-card")?.classList.remove("order-recovery");
+    document.querySelector("#result-card .result-intro h2").textContent = "Confira os temas da campanha.";
 
     if (checkoutPanel) {
       checkoutPanel.classList.add("hidden");
@@ -1109,9 +1111,13 @@ document.addEventListener("DOMContentLoaded", () => {
           deliveryPanel.classList.add("hidden");
         }
 
-        checkoutPanel.classList.remove(
-          "hidden"
-        );
+        checkoutPanel.classList.remove("hidden");
+        const summary = document.getElementById("checkout-summary");
+        summary.replaceChildren();
+        [`Produto: ${state.product}`, `Pacote: ${state.quantity} posts`, `Total: ${state.price}`,
+          "Entrega: galeria e ZIP após confirmação e geração"].forEach((line) => {
+          const p = document.createElement("p"); p.textContent = line; summary.append(p);
+        });
 
         checkoutPanel.scrollIntoView({
           behavior: "smooth",
@@ -1205,12 +1211,14 @@ document.addEventListener("DOMContentLoaded", () => {
           state.orderId =
             data.order_id;
           state.orderToken = data.order_token;
-          sessionStorage.setItem("pengyn_order", JSON.stringify({id: state.orderId, token: state.orderToken, demo: data.demo_payment}));
+          sessionStorage.setItem("pengyn_order", JSON.stringify({id: state.orderId, token: state.orderToken}));
+          showOrderLink();
+          showTicket(data.ticket_url);
           document.getElementById("btn-simulate-payment").classList.toggle("hidden", !data.demo_payment);
           document.getElementById("pix-explanation").textContent = data.demo_payment
             ? "PIX de demonstração: este código não é pagável. Use o botão de simulação."
             : "Pague o Pix e acompanhe a confirmação nesta página.";
-          if (!data.demo_payment) waitForDelivery(state.orderId).then(renderDelivery).catch((err) => showError(pixError, err.message));
+          if (!data.demo_payment) followOrder();
 
           state.pixCode =
             data.pix_code;
@@ -1374,31 +1382,103 @@ document.addEventListener("DOMContentLoaded", () => {
       const delivery = await response.json();
       document.getElementById("order-progress").textContent = {
         awaiting_payment: "Aguardando pagamento", queued: "Pagamento confirmado · aguardando geração",
-        generating: "Criando a campanha", ready: "Campanha pronta"
+        generating: "Criando a campanha", ready: "Campanha pronta", payment_error: "Falha ao gerar Pix"
       }[delivery.status] || "Aguardando atualização";
       if (delivery.status === "ready") return delivery.images;
+      if (delivery.status === "payment_error") throw new Error("Houve um problema com o pagamento. Entre em contato com o atendimento.");
       if (delivery.status === "failed") throw new Error(delivery.error || "Falha na geração da campanha.");
       await new Promise((resolve) => setTimeout(resolve, 3000));
     }
-    throw new Error("A geração continua em andamento. Consulte o pedido novamente em alguns minutos.");
+    throw new Error("O pedido continua em andamento. Sua campanha poderá levar alguns minutos para ficar pronta.");
   }
 
-  const saved = sessionStorage.getItem("pengyn_order");
-  if (saved) {
-    try {
-      const {id, token, demo} = JSON.parse(saved);
-      if (id && token) {
-        state.orderId = id; state.orderToken = token;
-        document.getElementById("btn-simulate-payment").classList.toggle("hidden", !demo);
-        document.getElementById("pix-explanation").textContent = demo
-          ? "PIX de demonstração: este código não é pagável. Use o botão de simulação."
-          : "Pagamento do pedido em acompanhamento.";
-        pixPanel.classList.remove("hidden");
-        document.getElementById("order-reference").textContent = `Pedido ${id} · guarde esta página até baixar sua campanha.`;
-        waitForDelivery(id).then(renderDelivery).catch((err) => showError(pixError, err.message));
-      }
-    } catch (_) { sessionStorage.removeItem("pengyn_order"); }
+  function orderLink() {
+    const fragment = new URLSearchParams({pedido: state.orderId, acesso: state.orderToken});
+    return `${location.origin}${location.pathname}#${fragment.toString()}`;
   }
+
+  function showOrderLink() {
+    document.getElementById("order-reference").textContent = `Pedido ${state.orderId} · salve o link de acesso.`;
+  }
+
+  function showTicket(url) {
+    const link = document.getElementById("payment-ticket");
+    if (url && /^https:\/\//.test(url)) {
+      link.href = url;
+      link.classList.remove("hidden");
+    } else {
+      link.removeAttribute("href");
+      link.classList.add("hidden");
+    }
+  }
+
+  let followInProgress = false;
+  async function followOrder() {
+    if (followInProgress || !state.orderId || !state.orderToken) return;
+    followInProgress = true;
+    hideError(pixError);
+    try {
+      renderDelivery(await waitForDelivery(state.orderId));
+    } catch (err) {
+      showError(pixError, `${err.message} Use “Atualizar acompanhamento” para consultar novamente.`);
+    } finally { followInProgress = false; }
+  }
+
+  document.getElementById("btn-copy-order-link")?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(orderLink());
+      document.getElementById("btn-copy-order-link").textContent = "Link copiado";
+    } catch (_) { showError(pixError, "Não foi possível copiar o link neste navegador."); }
+  });
+  document.getElementById("btn-refresh-order")?.addEventListener("click", followOrder);
+
+  async function restoreOrder() {
+    const fragment = new URLSearchParams(location.hash.slice(1));
+    const saved = sessionStorage.getItem("pengyn_order");
+    let access = null;
+    try { access = saved ? JSON.parse(saved) : null; } catch (_) { sessionStorage.removeItem("pengyn_order"); }
+    if (fragment.get("pedido") && fragment.get("acesso")) {
+      access = {id: fragment.get("pedido"), token: fragment.get("acesso")};
+      sessionStorage.setItem("pengyn_order", JSON.stringify(access));
+      history.replaceState(null, "", location.pathname + location.search);
+    }
+    if (!access?.id || !access?.token) return;
+    state.orderId = access.id;
+    state.orderToken = access.token;
+    try {
+      const headers = {"X-Order-Token": state.orderToken};
+      const [orderResponse, paymentResponse] = await Promise.all([
+        fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(state.orderId)}`, {headers}),
+        fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(state.orderId)}/payment`, {headers})
+      ]);
+      if (!orderResponse.ok || !paymentResponse.ok) throw new Error("Link do pedido inválido ou indisponível.");
+      const order = await orderResponse.json();
+      const payment = await paymentResponse.json();
+      state.transactionId = order.transaction_id;
+      state.pixCode = payment.pix_code;
+      document.getElementById("out-transaction-id").textContent = state.transactionId;
+      document.getElementById("out-pix-code").value = state.pixCode;
+      document.getElementById("btn-simulate-payment").classList.toggle("hidden", !payment.demo_payment);
+      document.getElementById("pix-explanation").textContent = payment.demo_payment
+        ? "Pix de demonstração: este código não é pagável. Use o botão de simulação."
+        : "Acompanhe a confirmação do pagamento nesta página.";
+      showTicket(payment.ticket_url);
+      showOrderLink();
+      document.getElementById("result-card").classList.remove("hidden");
+      document.getElementById("result-card").classList.add("order-recovery");
+      document.querySelector("#result-card .result-intro h2").textContent = "Seu pedido";
+      pixPanel.classList.remove("hidden");
+      pixPanel.scrollIntoView({behavior: "smooth", block: "start"});
+      followOrder();
+    } catch (err) {
+      document.getElementById("result-card").classList.remove("hidden");
+      document.getElementById("result-card").classList.add("order-recovery");
+      document.querySelector("#result-card .result-intro h2").textContent = "Seu pedido";
+      pixPanel.classList.remove("hidden");
+      showError(pixError, err.message);
+    }
+  }
+  restoreOrder();
 
   document.getElementById("btn-download-campaign")?.addEventListener("click", async () => {
     try {
@@ -1440,9 +1520,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           );
 
-         const images = await waitForDelivery(data.order_id || state.orderId);
-
-          renderDelivery(images);
+          await followOrder();
 
         } catch (err) {
 

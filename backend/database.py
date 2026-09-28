@@ -343,3 +343,23 @@ def get_asset_keys(order_id: str):
             return []
         assets = db.scalars(select(Asset).where(Asset.campaign_id == order.campaign_id).order_by(Asset.position)).all()
         return [{"position": asset.position, "title": asset.title, "caption": asset.caption, "image_url": asset.image_url} for asset in assets]
+
+class PaymentInstructions(Base):
+    __tablename__ = "payment_instructions"
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"), primary_key=True)
+    pix_code: Mapped[str] = mapped_column(String(1000))
+    ticket_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    demo: Mapped[bool] = mapped_column(default=False)
+
+
+def save_payment_instructions(order_id: str, code: str, ticket_url: str | None, demo: bool):
+    with SessionLocal.begin() as db:
+        db.add(PaymentInstructions(order_id=order_id, pix_code=code, ticket_url=ticket_url, demo=demo))
+
+
+def get_payment_instructions(order_id: str):
+    with SessionLocal() as db:
+        payment = db.get(PaymentInstructions, order_id)
+        if payment is None:
+            return None
+        return {"pix_code": payment.pix_code, "ticket_url": payment.ticket_url, "demo_payment": payment.demo}

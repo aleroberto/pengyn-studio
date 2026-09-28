@@ -302,3 +302,13 @@ segmento, produto, público e objetivo; ela **não** chama a IA antes do pagamen
 O briefing completo é salvo em `campaign_briefs` e entregue ao worker para
 orientar as legendas e os prompts visuais. A tabela adicional é criada no
 bootstrap atual; antes de operar com dados em produção, use migrações versionadas.
+
+## Interface — etapa 3
+
+A página mostra preços antes do briefing, resume o pedido antes de gerar o Pix,
+e permite copiar um link de acesso ao pedido. O link inclui o token no fragmento
+(`#`): o navegador o lê e remove da barra após abrir; ele não é enviado na URL
+para o servidor. Trate-o como uma senha: qualquer pessoa com esse link pode
+consultar a campanha. O código Pix é recuperável pela rota autenticada
+`GET /api/v1/orders/{id}/payment`. O status tem atualização manual se a espera
+for longa. A entrega por e-mail continua fora desta etapa.

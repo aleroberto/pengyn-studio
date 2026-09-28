@@ -2310,3 +2310,15 @@ body > section:nth-of-type(even) {
 .brief-inline-form input:focus, .brief-form input:focus, .brief-form textarea:focus { outline: 2px solid var(--primary); }
 .brief-help { color: var(--muted); margin: 10px 0; }
 @media (max-width: 600px) { .brief-inline-form { grid-template-columns: 1fr; } }
+
+/* Compra e retorno ao pedido */
+.hero-plan-summary { color: var(--muted); margin: 18px 0; font-weight: 600; }
+.checkout-summary { max-width: 420px; margin: 16px auto 26px; padding: 18px; border: 1px solid var(--border); border-radius: 16px; text-align: left; }
+.checkout-summary p + p { margin-top: 8px; }
+#btn-copy-order-link, #payment-ticket, #btn-refresh-order { display: block; width: min(100%, 340px); margin: 12px auto; text-align: center; }
+.order-recovery > .subtitle, .order-recovery > .strategy-context, .order-recovery > .strategy-grid, .order-recovery > .result-actions, .order-recovery > #checkout-panel { display: none; }
+.order-recovery > h2 { font-size: 1.5rem; }
+
+#payment-ticket.hidden { display: none; }
+
+.order-recovery > .result-intro, .order-recovery > .feed-preview-shell, .order-recovery > .result-conversion-copy { display: none; }

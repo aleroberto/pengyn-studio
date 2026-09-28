@@ -52,6 +52,7 @@
           Descreva seu negócio, veja a proposta da campanha e receba imagens e legendas prontas para revisar e baixar.
         </p>
 
+        <p class="hero-plan-summary">Pacotes: 3 posts por R$ 9,90 · 6 por R$ 14,90 · 12 por R$ 19,90</p>
         <div class="hero-actions">
           <a href="#onboarding" class="primary-button">
             Gerar meus posts
@@ -388,6 +389,8 @@
           </div>
 
           <div id="checkout-panel" class="flow-panel hidden">
+            <h3>Revise antes de gerar o Pix</h3>
+            <div id="checkout-summary" class="checkout-summary" aria-live="polite"></div>
             <h3>Dados para o pedido</h3>
             <p class="flow-note">O e-mail identifica o pedido. Guarde esta página para acompanhar a entrega; não enviamos acesso por e-mail nesta versão.</p>
             <form id="checkout-form">
@@ -412,6 +415,9 @@
             <h3>PIX do pedido</h3>
             <p id="pix-explanation" class="flow-note">Aguardando confirmação do pagamento.</p>
             <p id="order-reference" class="flow-note"></p>
+            <p class="flow-note">Salve o link de acesso para acompanhar e baixar a campanha em outro momento. Qualquer pessoa com esse link poderá ver o pedido.</p>
+            <button type="button" id="btn-copy-order-link" class="secondary-button">Copiar link do pedido</button>
+            <a id="payment-ticket" class="secondary-button hidden" target="_blank" rel="noopener noreferrer">Abrir instruções do Pix</a>
             <p class="pix-meta">Transação: <span id="out-transaction-id">-</span></p>
             <textarea id="out-pix-code" readonly rows="4"></textarea>
             <div class="pix-actions">
@@ -420,6 +426,7 @@
             </div>
             <p id="order-progress" class="flow-note" role="status"></p>
             <p id="pix-error" class="form-error hidden" role="alert"></p>
+            <button id="btn-refresh-order" type="button" class="secondary-button">Atualizar acompanhamento</button>
           </div>
 
           <div id="delivery-panel" class="flow-panel hidden">

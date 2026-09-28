@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 import uvicorn
 
-from database import attach_payment, check_order_access, fail_checkout, get_asset_keys, get_order, get_delivery, get_order_by_transaction_id, issue_order_access, queue_paid_order, record_checkout, request_regeneration, validate_payment
+from database import attach_payment, check_order_access, fail_checkout, get_asset_keys, get_order, get_payment_instructions, get_delivery, get_order_by_transaction_id, issue_order_access, queue_paid_order, record_checkout, request_regeneration, save_payment_instructions, validate_payment
 from services.ia_service import IAService
 from services.instagram_service import InstagramService
 from services.payment_service import PRICE_MAP, PaymentService
@@ -141,6 +141,15 @@ def require_order_access(order_id: str, request: Request):
         raise HTTPException(status_code=403, detail="Acesso ao pedido negado.")
 
 
+@app.get("/api/v1/orders/{order_id}/payment")
+def read_payment_instructions(order_id: str, request: Request):
+    require_order_access(order_id, request)
+    instructions = get_payment_instructions(order_id)
+    if instructions is None:
+        raise HTTPException(status_code=404, detail="Dados de pagamento não encontrados.")
+    return instructions
+
+
 @app.get("/api/v1/orders/{order_id}/delivery")
 def read_delivery(order_id: str, request: Request):
     require_order_access(order_id, request)
@@ -263,6 +272,7 @@ async def create_checkout(payload: CheckoutPayload):
         except Exception:
             fail_checkout(order_id)
             raise
+        save_payment_instructions(order_id, charge["pix_copia_e_cola"], charge.get("ticket_url"), not bool(mercado_pago.token))
         access_token = issue_order_access(order_id)
         logger.info(f"Cobrança criada com sucesso: {charge['transaction_id']}")
         return {

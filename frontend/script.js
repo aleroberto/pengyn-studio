@@ -22,17 +22,20 @@ revealOnScroll();
 
 const faqQuestions = document.querySelectorAll(".faq-question");
 
-faqQuestions.forEach((question) => {
+faqQuestions.forEach((question, index) => {
+  const answer = question.nextElementSibling;
+  answer.id = `faq-answer-${index}`;
+  question.setAttribute("aria-controls", answer.id);
+  question.setAttribute("aria-expanded", "false");
   question.addEventListener("click", () => {
-    const answer = question.nextElementSibling;
-    const isOpen = answer.style.maxHeight;
-
-    document.querySelectorAll(".faq-answer").forEach((item) => {
-      item.style.maxHeight = null;
+    const wasOpen = question.getAttribute("aria-expanded") === "true";
+    faqQuestions.forEach((other) => {
+      other.setAttribute("aria-expanded", "false");
+      other.nextElementSibling.style.maxHeight = null;
     });
-
-    if (!isOpen) {
-      answer.style.maxHeight = answer.scrollHeight + "px";
+    if (!wasOpen) {
+      question.setAttribute("aria-expanded", "true");
+      answer.style.maxHeight = `${answer.scrollHeight}px`;
     }
   });
 });
@@ -160,6 +163,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateProgress(1);
 
+  function goBackToStep(index) {
+    steps.forEach((step, i) => step.classList.toggle("hidden", i !== index));
+    if (indicator) indicator.textContent = `Etapa ${index + 1} de ${steps.length}`;
+    updateProgress(index + 1);
+    steps[index]?.querySelector("h3")?.focus();
+  }
+
   function goToNextStep(currentIndex) {
     if (currentIndex >= steps.length - 1) return;
 
@@ -171,6 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     updateProgress(currentIndex + 2);
+    steps[currentIndex + 1]?.querySelector("h3")?.focus();
 
     if (currentIndex + 1 === 4) {
       highlightPreferredQuantity();
@@ -199,6 +210,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   steps.forEach((step, index) => {
+    step.querySelector("h3")?.setAttribute("tabindex", "-1");
+    step.querySelector(".back-step")?.addEventListener("click", () => goBackToStep(index - 1));
     const buttons = step.querySelectorAll(
       "button[data-value], .plan-cta-onboarding, #btn-other-niche"
     );
@@ -385,6 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (progressBar) {
       progressBar.style.width = percent + "%";
+      progressBar.parentElement.setAttribute("aria-valuenow", String(step));
     }
   }
 
@@ -1331,15 +1345,29 @@ document.addEventListener("DOMContentLoaded", () => {
       figure.className = "delivery-card";
       const img = document.createElement("img");
       img.src = new URL(item.image_url, API_BASE).href;
-      img.alt = item.title;
+      img.alt = `Arte ${item.position + 1}: ${item.title}`;
+      img.loading = "lazy";
       const caption = document.createElement("figcaption");
-      caption.textContent = item.title;
+      caption.textContent = `Post ${item.position + 1} · ${item.title}`;
       const text = document.createElement("p");
       text.textContent = item.caption || "";
+      const actions = document.createElement("div");
+      actions.className = "delivery-actions";
+      const copy = document.createElement("button");
+      copy.type = "button";
+      copy.className = "secondary-button";
+      copy.textContent = "Copiar legenda";
+      copy.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(item.caption || ""); copy.textContent = "Legenda copiada"; }
+        catch (_) { showError(pixError, "Não foi possível copiar a legenda."); }
+      });
       const regen = document.createElement("button");
       regen.type = "button";
       regen.className = "secondary-button";
-      regen.textContent = item.regeneration_status === "completed" ? "Nova versão entregue" : item.regeneration_status ? "Nova versão em andamento" : "Gerar nova versão";
+      regen.textContent = {
+        completed: "Nova versão entregue", pending: "Nova versão na fila",
+        running: "Gerando nova versão", failed: "Falha na nova versão"
+      }[item.regeneration_status] || "Gerar nova versão";
       regen.disabled = Boolean(item.regeneration_status);
       regen.addEventListener("click", async () => {
         regen.disabled = true;
@@ -1353,7 +1381,8 @@ document.addEventListener("DOMContentLoaded", () => {
           renderDelivery(images);
         } catch (err) { showError(pixError, err.message); }
       });
-      figure.append(img, caption, text, regen);
+      actions.append(copy, regen);
+      figure.append(img, caption, text, actions);
       deliveryGallery.append(figure);
     });
     deliveryPanel.classList.remove("hidden");

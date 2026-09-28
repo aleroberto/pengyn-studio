@@ -2322,3 +2322,28 @@ body > section:nth-of-type(even) {
 #payment-ticket.hidden { display: none; }
 
 .order-recovery > .result-intro, .order-recovery > .feed-preview-shell, .order-recovery > .result-conversion-copy { display: none; }
+
+/* Acompanhamento e entrega */
+.delivery-gallery { align-items: start; }
+.delivery-card { display: flex; flex-direction: column; min-width: 0; }
+.delivery-card figcaption { padding: 18px 18px 6px; color: var(--text); font-size: 1rem; font-weight: 700; text-align: left; }
+.delivery-card p { padding: 0 18px; flex: 1; overflow-wrap: anywhere; }
+.delivery-actions { display: grid; gap: 8px; padding: 0 18px 18px; }
+.delivery-actions button { min-height: 44px; }
+.back-step { display: block; margin: 0 0 20px; padding: 8px 2px; border: 0; background: none; color: var(--muted); font: inherit; cursor: pointer; }
+.back-step:hover { color: var(--text); }
+.skip-link { position: fixed; top: -100px; left: 16px; z-index: 2000; padding: 12px; background: var(--primary); color: white; border-radius: 8px; }
+.skip-link:focus { top: 12px; }
+:where(button, a, input, textarea):focus-visible { outline: 3px solid #A5B4FC; outline-offset: 3px; }
+@media (min-width: 601px) and (max-width: 980px) { .delivery-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .delivery-gallery { grid-template-columns: minmax(0, 1fr); }
+  .delivery-card { max-width: 460px; width: 100%; margin-inline: auto; }
+  .hero h1 { min-height: 0; }
+  .cta-box { padding: 28px 16px; }
+  .flow-panel { overflow-wrap: anywhere; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .reveal { opacity: 1; transform: none; }
+}

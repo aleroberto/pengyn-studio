@@ -106,6 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const instagramInput = document.getElementById("client-instagram");
   const whatsappInput = document.getElementById("client-whatsapp");
 
+  const customNichePanel = document.getElementById("custom-niche-panel");
+  const customNicheInput = document.getElementById("custom-niche-input");
+  const customNicheContinue = document.getElementById("btn-custom-niche-continue");
+  const otherNicheButton = document.getElementById("btn-other-niche");
+
   const onboarding = document.getElementById("onboarding");
   const steps = document.querySelectorAll(".question-block");
   const indicator = document.querySelector(".step-indicator");
@@ -128,46 +133,146 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateProgress(1);
 
+  function goToNextStep(currentIndex) {
+    if (currentIndex >= steps.length - 1) return;
+
+    steps[currentIndex].classList.add("hidden");
+    steps[currentIndex + 1].classList.remove("hidden");
+
+    if (indicator) {
+      indicator.textContent = `Etapa ${currentIndex + 2} de ${steps.length}`;
+    }
+
+    updateProgress(currentIndex + 2);
+
+    if (currentIndex + 1 === 3) {
+      highlightPreferredQuantity();
+    }
+  }
+
+  function commitCustomNiche() {
+    if (!customNicheInput) return;
+
+    const value = customNicheInput.value.trim().replace(/\s+/g, " ");
+    if (!value) {
+      customNicheInput.focus();
+      return;
+    }
+
+    state.niche = value;
+
+    const nicheStep = steps[0];
+    nicheStep.querySelectorAll(".chips button").forEach((b) => b.classList.remove("active"));
+
+    if (otherNicheButton) {
+      otherNicheButton.classList.add("active");
+    }
+
+    goToNextStep(0);
+  }
+
   steps.forEach((step, index) => {
-    const buttons = step.querySelectorAll("button");
+    const buttons = step.querySelectorAll(
+      "button[data-value], .plan-cta-onboarding, #btn-other-niche"
+    );
 
     buttons.forEach((btn) => {
       btn.addEventListener("click", () => {
-        // Handle plan cards differently in step 4
+
+        // Etapa 4: seleção do pacote
         if (index === 3) {
           const planCards = step.querySelectorAll(".price-card-onboarding");
-          planCards.forEach((card) => card.classList.remove("selected"));
-          btn.closest(".price-card-onboarding").classList.add("selected");
+
+          planCards.forEach((card) => {
+            card.classList.remove("selected");
+          });
+
+          const currentCard = btn.closest(".price-card-onboarding");
+
+          if (currentCard) {
+            currentCard.classList.add("selected");
+          }
+
           state.quantity = btn.dataset.quantity;
+
           setTimeout(() => {
             finishOnboarding();
           }, 350);
+
           return;
         }
 
-        // Handle regular chips for steps 1-3
-        buttons.forEach((b) => b.classList.remove("active"));
+        // Etapa 1: opção "Outro"
+        if (index === 0 && btn.id === "btn-other-niche") {
+          step.querySelectorAll(".chips button").forEach((b) => {
+            b.classList.remove("active");
+          });
+
+          btn.classList.add("active");
+
+          state.niche = null;
+
+          if (customNichePanel) {
+            customNichePanel.classList.remove("hidden");
+          }
+
+          setTimeout(() => {
+            if (customNicheInput) {
+              customNicheInput.focus();
+            }
+          }, 80);
+
+          return;
+        }
+
+        // Chips regulares
+        step.querySelectorAll(".chips button").forEach((b) => {
+          b.classList.remove("active");
+        });
+
         btn.classList.add("active");
 
         const value = btn.dataset.value;
-        if (index === 0) state.niche = value;
-        if (index === 1) state.goal = value;
-        if (index === 2) state.style = value;
+
+        if (index === 0) {
+          state.niche = value;
+
+          if (customNichePanel) {
+            customNichePanel.classList.add("hidden");
+          }
+
+          if (customNicheInput) {
+            customNicheInput.value = "";
+          }
+        }
+
+        if (index === 1) {
+          state.goal = value;
+        }
+
+        if (index === 2) {
+          state.style = value;
+        }
 
         setTimeout(() => {
-          if (index < steps.length - 1) {
-            steps[index].classList.add("hidden");
-            steps[index + 1].classList.remove("hidden");
-
-            if (indicator) {
-              indicator.textContent = `Etapa ${index + 2} de ${steps.length}`;
-            }
-            updateProgress(index + 2);
-          }
+          goToNextStep(index);
         }, 350);
       });
     });
   });
+
+  if (customNicheContinue) {
+    customNicheContinue.addEventListener("click", commitCustomNiche);
+  }
+
+  if (customNicheInput) {
+    customNicheInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        commitCustomNiche();
+      }
+    });
+  }
 
   function createEmptyState() {
     return {
@@ -189,12 +294,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function highlightPreferredQuantity() {
     if (!preferredQuantity) return;
-    const qtyStep = document.querySelector('.question-block[data-step="4"]');
-    if (!qtyStep || qtyStep.classList.contains("hidden")) return;
+
+    const qtyStep = document.querySelector(
+      '.question-block[data-step="4"]'
+    );
+
+    if (!qtyStep || qtyStep.classList.contains("hidden")) {
+      return;
+    }
 
     const planCards = qtyStep.querySelectorAll(".price-card-onboarding");
+
     planCards.forEach((card) => {
       const btn = card.querySelector(".plan-cta-onboarding");
+
       if (btn && btn.dataset.quantity === preferredQuantity) {
         card.classList.add("selected");
       }
@@ -203,13 +316,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function finishOnboarding() {
     const lastStep = steps[steps.length - 1];
+
     lastStep.classList.add("hidden");
-    if (indicator) indicator.style.display = "none";
-    updateProgress(steps.length); // Show 100% progress
-    loading.classList.remove("hidden");
+
+    if (indicator) {
+      indicator.style.display = "none";
+    }
+
+    updateProgress(steps.length);
+
+    if (loading) {
+      loading.classList.remove("hidden");
+    }
 
     setTimeout(() => {
-      loading.classList.add("hidden");
+      if (loading) {
+        loading.classList.add("hidden");
+      }
+
       generateDynamicStrategy();
     }, 1200);
   }
@@ -217,116 +341,547 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateProgress(step) {
     const totalSteps = steps.length;
     const percent = (step / totalSteps) * 100;
-    if (progressBar) progressBar.style.width = percent + "%";
+
+    if (progressBar) {
+      progressBar.style.width = percent + "%";
+    }
+  }
+
+  const goalLabels = {
+    vendas: "Mais vendas",
+    clientes: "Atrair clientes",
+    autoridade: "Criar autoridade",
+    whatsapp: "Mensagens no WhatsApp"
+  };
+
+  const styleLabels = {
+    premium: "Premium",
+    minimalista: "Minimalista",
+    luxo: "Luxo",
+    vibrante: "Vibrante"
+  };
+
+  const strategyBlueprints = {
+
+    vendas: {
+      journey: [
+        "Atenção",
+        "Desejo",
+        "Prova",
+        "Oferta"
+      ],
+
+      items: [
+        {
+          title: "Impacto",
+          phase: "Atenção",
+          desc: "Abra a sequência com uma mensagem capaz de interromper o scroll."
+        },
+        {
+          title: "Problema",
+          phase: "Atenção",
+          desc: "Mostre uma dor ou necessidade que o público reconhece rapidamente."
+        },
+        {
+          title: "Desejo",
+          phase: "Desejo",
+          desc: "Apresente a transformação, experiência ou resultado que o cliente quer alcançar."
+        },
+        {
+          title: "Diferencial",
+          phase: "Desejo",
+          desc: "Destaque por que a sua oferta merece preferência."
+        },
+        {
+          title: "Valor",
+          phase: "Desejo",
+          desc: "Reforce benefícios e percepção de valor antes de falar em preço."
+        },
+        {
+          title: "Autoridade",
+          phase: "Prova",
+          desc: "Mostre domínio, método ou experiência para reduzir a incerteza."
+        },
+        {
+          title: "Prova",
+          phase: "Prova",
+          desc: "Use evidências, resultados ou sinais de confiança."
+        },
+        {
+          title: "Objeção",
+          phase: "Prova",
+          desc: "Antecipe a principal dúvida que pode travar a compra."
+        },
+        {
+          title: "Antecipação",
+          phase: "Oferta",
+          desc: "Prepare o público para a proposta e aumente a expectativa."
+        },
+        {
+          title: "Oferta",
+          phase: "Oferta",
+          desc: "Apresente a condição comercial com clareza e foco no benefício."
+        },
+        {
+          title: "Ação",
+          phase: "Oferta",
+          desc: "Faça uma chamada direta e simples para o próximo passo."
+        },
+        {
+          title: "Urgência",
+          phase: "Oferta",
+          desc: "Feche a sequência com um motivo concreto para agir agora."
+        }
+      ]
+    },
+
+    clientes: {
+      journey: [
+        "Descoberta",
+        "Interesse",
+        "Confiança",
+        "Contato"
+      ],
+
+      items: [
+        {
+          title: "Descoberta",
+          phase: "Descoberta",
+          desc: "Chame atenção de quem ainda não conhece a marca."
+        },
+        {
+          title: "Identificação",
+          phase: "Descoberta",
+          desc: "Faça o público reconhecer uma situação, desejo ou necessidade própria."
+        },
+        {
+          title: "Necessidade",
+          phase: "Interesse",
+          desc: "Mostre por que vale a pena resolver esse problema agora."
+        },
+        {
+          title: "Solução",
+          phase: "Interesse",
+          desc: "Apresente de forma simples como a marca pode ajudar."
+        },
+        {
+          title: "Experiência",
+          phase: "Interesse",
+          desc: "Mostre o que a pessoa pode esperar ao escolher a marca."
+        },
+        {
+          title: "Diferencial",
+          phase: "Confiança",
+          desc: "Destaque aquilo que torna a proposta mais relevante ou memorável."
+        },
+        {
+          title: "Autoridade",
+          phase: "Confiança",
+          desc: "Reforce competência, método, qualidade ou experiência."
+        },
+        {
+          title: "Prova",
+          phase: "Confiança",
+          desc: "Inclua sinais de validação que diminuam a insegurança."
+        },
+        {
+          title: "Benefício",
+          phase: "Contato",
+          desc: "Traduza a oferta em um benefício claro para o cliente."
+        },
+        {
+          title: "Convite",
+          phase: "Contato",
+          desc: "Convide o público a conhecer, perguntar ou solicitar informações."
+        },
+        {
+          title: "Contato",
+          phase: "Contato",
+          desc: "Mostre o canal e a ação que o cliente deve tomar."
+        },
+        {
+          title: "Próximo passo",
+          phase: "Contato",
+          desc: "Feche a jornada removendo fricção do primeiro contato."
+        }
+      ]
+    },
+
+    autoridade: {
+      journey: [
+        "Descoberta",
+        "Valor",
+        "Credibilidade",
+        "Referência"
+      ],
+
+      items: [
+        {
+          title: "Ponto de vista",
+          phase: "Descoberta",
+          desc: "Abra com uma opinião ou perspectiva clara sobre o seu mercado."
+        },
+        {
+          title: "Tema-chave",
+          phase: "Descoberta",
+          desc: "Apresente um assunto relevante que o público deveria entender."
+        },
+        {
+          title: "Educação",
+          phase: "Valor",
+          desc: "Ensine algo útil sem transformar o conteúdo em uma aula longa."
+        },
+        {
+          title: "Insight",
+          phase: "Valor",
+          desc: "Mostre uma leitura mais profunda ou pouco óbvia sobre o tema."
+        },
+        {
+          title: "Método",
+          phase: "Valor",
+          desc: "Apresente como você pensa ou estrutura a solução."
+        },
+        {
+          title: "Bastidores",
+          phase: "Credibilidade",
+          desc: "Mostre processo, cuidado e critérios por trás do trabalho."
+        },
+        {
+          title: "Erro comum",
+          phase: "Credibilidade",
+          desc: "Aponte um erro recorrente e explique uma alternativa melhor."
+        },
+        {
+          title: "Mito x verdade",
+          phase: "Credibilidade",
+          desc: "Quebre uma percepção comum usando conhecimento e contexto."
+        },
+        {
+          title: "Evidência",
+          phase: "Referência",
+          desc: "Sustente a mensagem com resultados, exemplos ou demonstrações."
+        },
+        {
+          title: "Caso",
+          phase: "Referência",
+          desc: "Mostre uma aplicação prática do conhecimento apresentado."
+        },
+        {
+          title: "Posicionamento",
+          phase: "Referência",
+          desc: "Reforce o território que você quer ocupar na mente do público."
+        },
+        {
+          title: "Referência",
+          phase: "Referência",
+          desc: "Feche convidando o público a acompanhar a marca como fonte confiável."
+        }
+      ]
+    },
+
+    whatsapp: {
+      journey: [
+        "Atenção",
+        "Interesse",
+        "Confiança",
+        "Conversa"
+      ],
+
+      items: [
+        {
+          title: "Impacto",
+          phase: "Atenção",
+          desc: "Comece com uma mensagem simples, forte e fácil de entender."
+        },
+        {
+          title: "Identificação",
+          phase: "Atenção",
+          desc: "Faça o público se reconhecer no problema ou desejo apresentado."
+        },
+        {
+          title: "Problema",
+          phase: "Interesse",
+          desc: "Evidencie a situação que leva a pessoa a procurar ajuda ou solução."
+        },
+        {
+          title: "Solução",
+          phase: "Interesse",
+          desc: "Apresente o caminho de forma clara e sem excesso de informação."
+        },
+        {
+          title: "Desejo",
+          phase: "Interesse",
+          desc: "Mostre o resultado, experiência ou benefício que desperta vontade."
+        },
+        {
+          title: "Diferencial",
+          phase: "Confiança",
+          desc: "Explique por que vale a pena iniciar a conversa com a sua marca."
+        },
+        {
+          title: "Autoridade",
+          phase: "Confiança",
+          desc: "Reduza o risco percebido mostrando domínio e profissionalismo."
+        },
+        {
+          title: "Prova",
+          phase: "Confiança",
+          desc: "Use sinais que mostrem que outras pessoas já confiaram na solução."
+        },
+        {
+          title: "Objeção",
+          phase: "Conversa",
+          desc: "Responda uma dúvida importante antes que ela impeça o contato."
+        },
+        {
+          title: "Convite",
+          phase: "Conversa",
+          desc: "Abra a porta para uma conversa sem compromisso ou com baixa fricção."
+        },
+        {
+          title: "WhatsApp",
+          phase: "Conversa",
+          desc: "Faça uma chamada direta para iniciar a conversa no WhatsApp."
+        },
+        {
+          title: "Conversa",
+          phase: "Conversa",
+          desc: "Feche reforçando que o próximo passo é simples: enviar uma mensagem."
+        }
+      ]
+    }
+  };
+
+  const quantityIndexes = {
+    "3": [0, 6, 10],
+    "6": [0, 2, 4, 6, 8, 10],
+    "12": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  };
+
+  function labelFor(map, value) {
+    return map[value] || formatText(value);
+  }
+
+  function buildJourney(journey) {
+    const journeyEl = document.querySelector(".strategy-journey");
+
+    if (!journeyEl) return;
+
+    journeyEl.innerHTML = journey
+      .map((item, index) => {
+        const label = `<span>${item}</span>`;
+
+        const arrow = index < journey.length - 1
+          ? '<span class="journey-arrow">→</span>'
+          : "";
+
+        return label + arrow;
+      })
+      .join("");
   }
 
   function generateDynamicStrategy() {
     const resultCard = document.getElementById("result-card");
-    resultCard.classList.remove("hidden");
-
-    document.getElementById("out-goal").textContent = formatText(state.goal);
-    document.getElementById("out-niche").textContent = formatText(state.niche);
-    document.getElementById("out-quantity").textContent = `${state.quantity} Posts`;
-
-    const strategyDatabase = {
-      "3": [
-        { title: "1. Abertura Hero", desc: "Uma apresentação de altíssimo impacto do seu serviço para gerar desejo imediato." },
-        { title: "2. Prova de Autoridade", desc: "Elementos visuais que constroem confiança e mostram que você é referência." },
-        { title: "3. Oferta e Escassez", desc: "O gatilho final com condição especial e chamada para ação direta." }
-      ],
-      "6": [
-        { title: "1. Produto Hero", desc: "Uma imagem de altíssimo impacto do seu melhor serviço para gerar desejo imediato." },
-        { title: "2. Desejo Sensorial", desc: "Foco nos detalhes e na qualidade. Mostramos a experiência premium do cliente." },
-        { title: "3. Autoridade", desc: "Elementos que constroem confiança e justificam seu preço premium." },
-        { title: "4. Oferta Irresistível", desc: "Revelação de condição especial ou bônus, impossível de ignorar." },
-        { title: "5. Conversão Direta", desc: "Convite claro e elegante para agendamento ou mensagem no WhatsApp." },
-        { title: "6. Urgência Final", desc: "Acionamos o senso de escassez de vagas ou tempo para forçar a decisão." }
-      ],
-      "12": [
-        { title: "1. Produto Hero", desc: "Impacto visual máximo no primeiro contato." },
-        { title: "2. Desejo Sensorial", desc: "Venda da experiência e do conforto." },
-        { title: "3. Educacional de Valor", desc: "Educa a audiência sobre seu diferencial." },
-        { title: "4. Bastidores", desc: "Conexão humana mostrando os bastidores." },
-        { title: "5. Prova Social", desc: "Validação externa através de depoimentos." },
-        { title: "6. Quebra de Objeção", desc: "Responde por que seu produto é o melhor investimento." },
-        { title: "7. O Mito vs Verdade", desc: "Quebra paradigmas do seu nicho para gerar autoridade." },
-        { title: "8. Check-list do Cliente", desc: "Como se preparar para a sua experiência." },
-        { title: "9. Antecipação", desc: "Gera mistério e expectativa para a oferta." },
-        { title: "10. Oferta Exclusiva", desc: "A revelação da condição imperdível." },
-        { title: "11. CTA de Vendas", desc: "Chamada direta e sem fricção para o WhatsApp." },
-        { title: "12. Fechamento Urgente", desc: "Aviso de vagas/estoque esgotando." }
-      ]
-    };
-
-    const selectedStrategy = strategyDatabase[state.quantity] || strategyDatabase["6"];
     const gridContainer = document.getElementById("dynamic-grid");
-    gridContainer.innerHTML = "";
+    const countOutput = document.getElementById("feed-preview-count");
 
-    selectedStrategy.forEach((item) => {
-      const cardHTML = `
-        <div class="strategy-card reveal active">
-          <div class="strategy-header">${item.title}</div>
-          <div class="strategy-desc">${item.desc}</div>
-        </div>
-      `;
-      gridContainer.insertAdjacentHTML("beforeend", cardHTML);
-    });
-
-    state.titles = selectedStrategy.map((item) => item.title);
-    state.title = state.titles[0] || `${state.niche} — ${state.style}`;
-    state.price = prices[state.quantity] || prices["6"];
-
-    const btnCheckout = document.getElementById("btn-checkout");
-    if (btnCheckout) {
-      btnCheckout.textContent = `Contratar ${state.quantity} Posts (${state.price})`;
+    if (!resultCard || !gridContainer) {
+      return;
     }
 
-    resultCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    resultCard.classList.remove("hidden");
+
+    resultCard.dataset.style = state.style || "premium";
+
+    const outNiche = document.getElementById("out-niche");
+    const outGoal = document.getElementById("out-goal");
+    const outStyle = document.getElementById("out-style");
+    const outQuantity = document.getElementById("out-quantity");
+
+    if (outNiche) {
+      outNiche.textContent = formatText(state.niche);
+    }
+
+    if (outGoal) {
+      outGoal.textContent = labelFor(goalLabels, state.goal);
+    }
+
+    if (outStyle) {
+      outStyle.textContent = labelFor(styleLabels, state.style);
+    }
+
+    if (outQuantity) {
+      outQuantity.textContent = `${state.quantity} posts`;
+    }
+
+    if (countOutput) {
+      countOutput.textContent = `${state.quantity} posts`;
+    }
+
+    const blueprint =
+      strategyBlueprints[state.goal] ||
+      strategyBlueprints.vendas;
+
+    const indexes =
+      quantityIndexes[String(state.quantity)] ||
+      quantityIndexes["6"];
+
+    const selectedStrategy = indexes
+      .map((index) => blueprint.items[index])
+      .filter(Boolean);
+
+    buildJourney(blueprint.journey);
+
+    gridContainer.innerHTML = "";
+
+    selectedStrategy.forEach((item, index) => {
+      const number = String(index + 1).padStart(2, "0");
+
+      const cardHTML = `
+        <article class="feed-tile reveal active">
+
+          <span class="feed-tile-number">
+            ${number}
+          </span>
+
+          <div class="feed-tile-content">
+
+            <span class="feed-tile-kicker">
+              ${item.phase}
+            </span>
+
+            <h4 class="feed-tile-title">
+              ${item.title}
+            </h4>
+
+          </div>
+
+          <p class="feed-tile-desc">
+            ${item.desc}
+          </p>
+
+        </article>
+      `;
+
+      gridContainer.insertAdjacentHTML(
+        "beforeend",
+        cardHTML
+      );
+    });
+
+    state.titles = selectedStrategy.map(
+      (item, index) => `${index + 1}. ${item.title}`
+    );
+
+    state.title =
+      `${formatText(state.niche)} — ` +
+      `${labelFor(goalLabels, state.goal)} — ` +
+      `${labelFor(styleLabels, state.style)}`;
+
+    state.price =
+      prices[state.quantity] ||
+      prices["6"];
+
+    const btnCheckout =
+      document.getElementById("btn-checkout");
+
+    if (btnCheckout) {
+      btnCheckout.textContent =
+        `Criar meus ${state.quantity} posts — ${state.price}`;
+    }
+
+    resultCard.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest"
+    });
   }
 
   function showError(el, message) {
     if (!el) return;
+
     el.textContent = message;
     el.classList.remove("hidden");
   }
 
   function hideError(el) {
     if (!el) return;
+
     el.textContent = "";
     el.classList.add("hidden");
   }
 
   function setInputValidity(input, ok) {
     if (!input) return;
-    input.classList.toggle("input-invalid", ok === false);
-    input.classList.toggle("input-valid", ok === true);
+
+    input.classList.toggle(
+      "input-invalid",
+      ok === false
+    );
+
+    input.classList.toggle(
+      "input-valid",
+      ok === true
+    );
   }
 
   function resetFlowPanels() {
     hideError(checkoutError);
     hideError(pixError);
-    if (checkoutForm) checkoutForm.reset();
-    if (checkoutPanel) checkoutPanel.classList.add("hidden");
-    if (pixPanel) pixPanel.classList.add("hidden");
-    if (deliveryPanel) deliveryPanel.classList.add("hidden");
-    if (deliveryGallery) deliveryGallery.innerHTML = "";
-    const pixCodeOut = document.getElementById("out-pix-code");
-    if (pixCodeOut) pixCodeOut.value = "";
-    const txOut = document.getElementById("out-transaction-id");
-    if (txOut) txOut.textContent = "-";
+
+    if (checkoutForm) {
+      checkoutForm.reset();
+    }
+
+    if (checkoutPanel) {
+      checkoutPanel.classList.add("hidden");
+    }
+
+    if (pixPanel) {
+      pixPanel.classList.add("hidden");
+    }
+
+    if (deliveryPanel) {
+      deliveryPanel.classList.add("hidden");
+    }
+
+    if (deliveryGallery) {
+      deliveryGallery.innerHTML = "";
+    }
+
+    const pixCodeOut =
+      document.getElementById("out-pix-code");
+
+    if (pixCodeOut) {
+      pixCodeOut.value = "";
+    }
+
+    const txOut =
+      document.getElementById("out-transaction-id");
+
+    if (txOut) {
+      txOut.textContent = "-";
+    }
+
     setInputValidity(instagramInput, null);
     setInputValidity(whatsappInput, null);
+
     removeInstagramError();
   }
 
   async function apiPost(path, body) {
-    const response = await fetch(`${API_BASE}${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
+    const response = await fetch(
+      `${API_BASE}${path}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      }
+    );
 
     let data = {};
+
     try {
       data = await response.json();
     } catch (err) {
@@ -335,11 +890,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!response.ok) {
       const detail = data.detail;
-      const message = typeof detail === "string"
-        ? detail
-        : Array.isArray(detail)
-          ? detail.map((item) => item.msg || item).join(" ")
-          : `Erro ${response.status} ao falar com a API.`;
+
+      const message =
+        typeof detail === "string"
+          ? detail
+          : Array.isArray(detail)
+            ? detail
+              .map((item) => item.msg || item)
+              .join(" ")
+            : `Erro ${response.status} ao falar com a API.`;
+
       throw new Error(message);
     }
 
@@ -348,234 +908,596 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyInstagramError(message) {
     if (!instagramInput) return;
-    removeInstagramError();
-    setInputValidity(instagramInput, false);
 
-    const errorText = document.createElement("span");
-    errorText.className = "input-error-msg";
-    errorText.textContent = message;
-    instagramInput.parentNode.appendChild(errorText);
+    removeInstagramError();
+
+    setInputValidity(
+      instagramInput,
+      false
+    );
+
+    const errorText =
+      document.createElement("span");
+
+    errorText.className =
+      "input-error-msg";
+
+    errorText.textContent =
+      message;
+
+    instagramInput.parentNode
+      .appendChild(errorText);
   }
 
   function applyInstagramSuccess(cleanUsername) {
     if (!instagramInput) return;
+
     removeInstagramError();
-    setInputValidity(instagramInput, true);
-    instagramInput.value = `@${cleanUsername}`;
+
+    setInputValidity(
+      instagramInput,
+      true
+    );
+
+    instagramInput.value =
+      `@${cleanUsername}`;
   }
 
   function removeInstagramError() {
     if (!instagramInput) return;
-    const oldMsg = instagramInput.parentNode.querySelector(".input-error-msg");
-    if (oldMsg) oldMsg.remove();
+
+    const oldMsg =
+      instagramInput.parentNode
+        .querySelector(".input-error-msg");
+
+    if (oldMsg) {
+      oldMsg.remove();
+    }
   }
 
   if (instagramInput) {
-    instagramInput.addEventListener("blur", async () => {
-      const usernameValue = instagramInput.value.trim();
-      if (!usernameValue) return;
+    instagramInput.addEventListener(
+      "blur",
+      async () => {
 
-      try {
-        const data = await apiPost("/api/v1/validate-instagram", { username: usernameValue });
-        if (data.valid === false) {
-          applyInstagramError(data.message);
-        } else {
-          applyInstagramSuccess(data.username);
+        const usernameValue =
+          instagramInput.value.trim();
+
+        if (!usernameValue) {
+          return;
         }
-      } catch (error) {
-        console.error("Falha ao validar perfil:", error);
+
+        try {
+          const data = await apiPost(
+            "/api/v1/validate-instagram",
+            {
+              username: usernameValue
+            }
+          );
+
+          if (data.valid === false) {
+            applyInstagramError(
+              data.message
+            );
+          } else {
+            applyInstagramSuccess(
+              data.username
+            );
+          }
+
+        } catch (error) {
+          console.error(
+            "Falha ao validar perfil:",
+            error
+          );
+        }
       }
-    });
+    );
   }
 
   if (whatsappInput) {
-    whatsappInput.addEventListener("input", (e) => {
-      let value = e.target.value.replace(/\D/g, "");
-      if (value.length > 11) value = value.slice(0, 11);
+    whatsappInput.addEventListener(
+      "input",
+      (e) => {
 
-      if (value.length > 10) {
-        value = value.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
-      } else if (value.length > 6) {
-        value = value.replace(/^(\d{2})(\d{4,5})(\d{0,4})$/, "($1) $2-$3");
-      } else if (value.length > 2) {
-        value = value.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
-      } else if (value.length > 0) {
-        value = value.replace(/^(\d{0,2})$/, "($1");
+        let value =
+          e.target.value.replace(/\D/g, "");
+
+        if (value.length > 11) {
+          value = value.slice(0, 11);
+        }
+
+        if (value.length > 10) {
+          value = value.replace(
+            /^(\d{2})(\d{5})(\d{4})$/,
+            "($1) $2-$3"
+          );
+
+        } else if (value.length > 6) {
+          value = value.replace(
+            /^(\d{2})(\d{4,5})(\d{0,4})$/,
+            "($1) $2-$3"
+          );
+
+        } else if (value.length > 2) {
+          value = value.replace(
+            /^(\d{2})(\d{0,5})$/,
+            "($1) $2"
+          );
+
+        } else if (value.length > 0) {
+          value = value.replace(
+            /^(\d{0,2})$/,
+            "($1"
+          );
+        }
+
+        e.target.value = value;
+
+        const digits =
+          value.replace(/\D/g, "");
+
+        setInputValidity(
+          whatsappInput,
+          digits.length === 10 ||
+          digits.length === 11
+        );
       }
-
-      e.target.value = value;
-      const digits = value.replace(/\D/g, "");
-      setInputValidity(whatsappInput, digits.length === 10 || digits.length === 11);
-    });
+    );
   }
 
-  const btnCheckout = document.getElementById("btn-checkout");
+  const btnCheckout =
+    document.getElementById("btn-checkout");
+
   if (btnCheckout && checkoutPanel) {
-    btnCheckout.addEventListener("click", () => {
-      pixPanel.classList.add("hidden");
-      deliveryPanel.classList.add("hidden");
-      checkoutPanel.classList.remove("hidden");
-      checkoutPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
+
+    btnCheckout.addEventListener(
+      "click",
+      () => {
+
+        if (pixPanel) {
+          pixPanel.classList.add("hidden");
+        }
+
+        if (deliveryPanel) {
+          deliveryPanel.classList.add("hidden");
+        }
+
+        checkoutPanel.classList.remove(
+          "hidden"
+        );
+
+        checkoutPanel.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest"
+        });
+      }
+    );
   }
 
   if (checkoutForm) {
-    checkoutForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      hideError(checkoutError);
+    checkoutForm.addEventListener(
+      "submit",
+      async (e) => {
 
-      state.instagram = document.getElementById("client-instagram").value.trim();
-      state.whatsapp = document.getElementById("client-whatsapp").value.trim();
-      state.email = document.getElementById("client-email").value.trim();
+        e.preventDefault();
 
-      const submitBtn = document.getElementById("btn-submit-checkout");
-      if (submitBtn) submitBtn.disabled = true;
-      loading.classList.remove("hidden");
+        hideError(checkoutError);
 
-      try {
-        const data = await apiPost("/api/v1/checkout", {
-          config: {
-            niche: state.niche,
-            style: state.style,
-            title: state.title || `${state.niche} — ${state.style}`,
-            goal: state.goal || "",
-            titles: state.titles
-          },
-          client: {
-            instagram: state.instagram,
-            whatsapp: state.whatsapp,
-            email: state.email
-          },
-          purchase: {
-            quantity: String(state.quantity),
-            price: state.price
+        state.instagram =
+          document
+            .getElementById("client-instagram")
+            .value
+            .trim();
+
+        state.whatsapp =
+          document
+            .getElementById("client-whatsapp")
+            .value
+            .trim();
+
+        state.email =
+          document
+            .getElementById("client-email")
+            .value
+            .trim();
+
+        const submitBtn =
+          document.getElementById(
+            "btn-submit-checkout"
+          );
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+        }
+
+        if (loading) {
+          loading.classList.remove("hidden");
+        }
+
+        try {
+          const data = await apiPost(
+            "/api/v1/checkout",
+            {
+              config: {
+                niche: state.niche,
+                style: state.style,
+                title:
+                  state.title ||
+                  `${state.niche} — ${state.style}`,
+                goal:
+                  state.goal || "",
+                titles:
+                  state.titles
+              },
+
+              client: {
+                instagram:
+                  state.instagram,
+                whatsapp:
+                  state.whatsapp,
+                email:
+                  state.email
+              },
+
+              purchase: {
+                quantity:
+                  String(state.quantity),
+                price:
+                  state.price
+              }
+            }
+          );
+
+          state.transactionId =
+            data.transaction_id;
+
+          state.orderId =
+            data.order_id;
+
+          state.pixCode =
+            data.pix_code;
+
+          const transactionOutput =
+            document.getElementById(
+              "out-transaction-id"
+            );
+
+          const pixOutput =
+            document.getElementById(
+              "out-pix-code"
+            );
+
+          if (transactionOutput) {
+            transactionOutput.textContent =
+              state.transactionId;
           }
-        });
 
-        state.transactionId = data.transaction_id;
-        state.orderId = data.order_id;
-        state.pixCode = data.pix_code;
-        document.getElementById("out-transaction-id").textContent = state.transactionId;
-        document.getElementById("out-pix-code").value = state.pixCode;
-        pixPanel.classList.remove("hidden");
-        pixPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      } catch (err) {
-        const offline = err instanceof TypeError;
-        showError(
-          checkoutError,
-          offline
-            ? "Não foi possível conectar à API. Suba o backend em http://127.0.0.1:8000."
-            : err.message
-        );
-      } finally {
-        loading.classList.add("hidden");
-        if (submitBtn) submitBtn.disabled = false;
+          if (pixOutput) {
+            pixOutput.value =
+              state.pixCode;
+          }
+
+          if (pixPanel) {
+            pixPanel.classList.remove(
+              "hidden"
+            );
+
+            pixPanel.scrollIntoView({
+              behavior: "smooth",
+              block: "nearest"
+            });
+          }
+
+        } catch (err) {
+          const offline =
+            err instanceof TypeError;
+
+          showError(
+            checkoutError,
+            offline
+              ? "Não foi possível conectar à API. Suba o backend em http://127.0.0.1:8000."
+              : err.message
+          );
+
+        } finally {
+
+          if (loading) {
+            loading.classList.add("hidden");
+          }
+
+          if (submitBtn) {
+            submitBtn.disabled = false;
+          }
+        }
       }
-    });
+    );
   }
 
-  const btnCopyPix = document.getElementById("btn-copy-pix");
+  const btnCopyPix =
+    document.getElementById("btn-copy-pix");
+
   if (btnCopyPix) {
-    btnCopyPix.addEventListener("click", async () => {
-      const code = document.getElementById("out-pix-code").value;
-      if (!code) return;
-      try {
-        await navigator.clipboard.writeText(code);
-        btnCopyPix.textContent = "Copiado";
-        setTimeout(() => {
-          btnCopyPix.textContent = "Copiar código";
-        }, 1600);
-      } catch (err) {
-        document.getElementById("out-pix-code").select();
+    btnCopyPix.addEventListener(
+      "click",
+      async () => {
+
+        const pixOutput =
+          document.getElementById(
+            "out-pix-code"
+          );
+
+        if (!pixOutput) {
+          return;
+        }
+
+        const code =
+          pixOutput.value;
+
+        if (!code) {
+          return;
+        }
+
+        try {
+          await navigator.clipboard
+            .writeText(code);
+
+          btnCopyPix.textContent =
+            "Copiado";
+
+          setTimeout(() => {
+            btnCopyPix.textContent =
+              "Copiar código";
+          }, 1600);
+
+        } catch (err) {
+          pixOutput.select();
+        }
       }
-    });
+    );
   }
 
   function renderDelivery(images) {
-    if (!deliveryGallery) return;
-    deliveryGallery.replaceChildren();
-    images.forEach((item) => {
-      const figure = document.createElement("figure");
-      figure.className = "delivery-card";
-      const img = document.createElement("img");
-      img.src = new URL(item.image_url, API_BASE).href;
-      img.alt = item.title;
-      const caption = document.createElement("figcaption");
-      caption.textContent = item.title;
-      figure.append(img, caption);
-      deliveryGallery.append(figure);
+  if (!deliveryGallery) {
+    return;
+  }
+
+  deliveryGallery.replaceChildren();
+
+  images.forEach((item) => {
+    const figure = document.createElement("figure");
+    figure.className = "delivery-card";
+
+    const img = document.createElement("img");
+    img.src = new URL(item.image_url, API_BASE).href;
+    img.alt = item.title;
+
+    const caption = document.createElement("figcaption");
+    caption.textContent = item.title;
+
+    figure.append(img, caption);
+    deliveryGallery.append(figure);
+  });
+
+  if (deliveryPanel) {
+    deliveryPanel.classList.remove(
+      "hidden"
+    );
+
+    deliveryPanel.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest"
     });
-    deliveryPanel.classList.remove("hidden");
-    deliveryPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
+}
 
-  async function waitForDelivery(orderId) {
-    for (let attempt = 0; attempt < 120; attempt++) {
-      const response = await fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(orderId)}/delivery`);
-      if (!response.ok) throw new Error("Não foi possível consultar o pedido.");
-      const delivery = await response.json();
-      if (delivery.status === "ready") return delivery.images;
-      if (delivery.status === "failed") throw new Error(delivery.error || "Falha na geração da campanha.");
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+async function waitForDelivery(orderId) {
+  for (let attempt = 0; attempt < 120; attempt++) {
+    const response = await fetch(
+      `${API_BASE}/api/v1/orders/${encodeURIComponent(orderId)}/delivery`
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        "Não foi possível consultar o pedido."
+      );
     }
-    throw new Error("A geração continua em andamento. Consulte o pedido novamente em alguns minutos.");
+
+    const delivery = await response.json();
+
+    if (delivery.status === "ready") {
+      return delivery.images;
+    }
+
+    if (delivery.status === "failed") {
+      throw new Error(
+        delivery.error ||
+        "Falha na geração da campanha."
+      );
+    }
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, 3000)
+    );
   }
 
-  const btnSimulate = document.getElementById("btn-simulate-payment");
-  if (btnSimulate) {
-    btnSimulate.addEventListener("click", async () => {
-      hideError(pixError);
-      btnSimulate.disabled = true;
-      loading.classList.remove("hidden");
+  throw new Error(
+    "A geração continua em andamento. Consulte o pedido novamente em alguns minutos."
+  );
+}
 
-      try {
-        const data = await apiPost("/api/v1/simulate-payment", {
-          transaction_id: state.transactionId
+  const btnSimulate =
+    document.getElementById(
+      "btn-simulate-payment"
+    );
+
+  if (btnSimulate) {
+    btnSimulate.addEventListener(
+      "click",
+      async () => {
+
+        hideError(pixError);
+
+        btnSimulate.disabled = true;
+
+        if (loading) {
+          loading.classList.remove(
+            "hidden"
+          );
+        }
+
+        try {
+          const data = await apiPost(
+            "/api/v1/simulate-payment",
+            {
+              transaction_id:
+                state.transactionId
+            }
+          );
+
+         const images = await waitForDelivery(
+            data.order_id || state.orderId
+      );
+
+          renderDelivery(images);
+
+        } catch (err) {
+
+          const offline =
+            err instanceof TypeError;
+
+          showError(
+            pixError,
+            offline
+              ? "Não foi possível conectar à API para simular o pagamento."
+              : err.message
+          );
+
+        } finally {
+
+          if (loading) {
+            loading.classList.add(
+              "hidden"
+            );
+          }
+
+          btnSimulate.disabled = false;
+        }
+      }
+    );
+  }
+
+  const btnRestart =
+    document.getElementById(
+      "btn-restart"
+    );
+
+  if (btnRestart) {
+    btnRestart.addEventListener(
+      "click",
+      () => {
+
+        const resultCard =
+          document.getElementById(
+            "result-card"
+          );
+
+        if (resultCard) {
+          resultCard.classList.add(
+            "hidden"
+          );
+        }
+
+        document
+          .querySelectorAll(
+            ".chips button"
+          )
+          .forEach((b) => {
+            b.classList.remove(
+              "active"
+            );
+          });
+
+        document
+          .querySelectorAll(
+            ".price-card-onboarding"
+          )
+          .forEach((card) => {
+            card.classList.remove(
+              "selected"
+            );
+          });
+
+        steps.forEach((step) => {
+          step.classList.add("hidden");
         });
 
-        const images = await waitForDelivery(data.order_id || state.orderId);
+        if (steps[0]) {
+          steps[0].classList.remove(
+            "hidden"
+          );
+        }
 
-        renderDelivery(images);
-      } catch (err) {
-        const offline = err instanceof TypeError;
-        showError(
-          pixError,
-          offline
-            ? "Não foi possível conectar à API para simular o pagamento."
-            : err.message
-        );
-      } finally {
-        loading.classList.add("hidden");
-        btnSimulate.disabled = false;
+        state =
+          createEmptyState();
+
+        resetFlowPanels();
+
+        if (customNichePanel) {
+          customNichePanel.classList.add(
+            "hidden"
+          );
+        }
+
+        if (customNicheInput) {
+          customNicheInput.value = "";
+        }
+
+        if (otherNicheButton) {
+          otherNicheButton.classList.remove(
+            "active"
+          );
+        }
+
+        if (resultCard) {
+          resultCard.removeAttribute(
+            "data-style"
+          );
+        }
+
+        if (indicator) {
+          indicator.style.display =
+            "block";
+
+          indicator.textContent =
+            `Etapa 1 de ${steps.length}`;
+        }
+
+        updateProgress(1);
+
+        const onboardingElement =
+          document.getElementById(
+            "onboarding"
+          );
+
+        if (onboardingElement) {
+          onboardingElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        }
       }
-    });
-  }
-
-  const btnRestart = document.getElementById("btn-restart");
-  if (btnRestart) {
-    btnRestart.addEventListener("click", () => {
-      document.getElementById("result-card").classList.add("hidden");
-      document.querySelectorAll(".chips button").forEach((b) => b.classList.remove("active"));
-      document.querySelectorAll(".price-card-onboarding").forEach((card) => card.classList.remove("selected"));
-
-      steps.forEach((s) => s.classList.add("hidden"));
-      steps[0].classList.remove("hidden");
-
-      state = createEmptyState();
-      resetFlowPanels();
-
-      if (indicator) {
-        indicator.style.display = "block";
-        indicator.textContent = `Etapa 1 de ${steps.length}`;
-      }
-      updateProgress(1);
-
-      document.getElementById("onboarding").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    );
   }
 
   function formatText(text) {
-    if (!text) return "-";
-    return text.charAt(0).toUpperCase() + text.slice(1);
+    if (!text) {
+      return "-";
+    }
+
+    return (
+      text.charAt(0).toUpperCase() +
+      text.slice(1)
+    );
   }
 });

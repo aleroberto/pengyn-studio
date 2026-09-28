@@ -4,14 +4,16 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field, ValidationError
 import logging
+import uuid
 import os
 from pathlib import Path
 import uvicorn
 
-from database import get_order, get_delivery, get_order_by_transaction_id, queue_paid_order, record_checkout
+from database import attach_payment, fail_checkout, get_order, get_delivery, get_order_by_transaction_id, queue_paid_order, record_checkout, validate_payment
 from services.ia_service import IAService
 from services.instagram_service import InstagramService
 from services.payment_service import PRICE_MAP, PaymentService
+from services.mercado_pago import MercadoPagoService
 
 # Configuração de logging
 logging.basicConfig(
@@ -23,6 +25,7 @@ logger = logging.getLogger(__name__)
 instagram_service = InstagramService()
 ia_service = IAService()
 payment_service = PaymentService()
+mercado_pago = MercadoPagoService()
 
 app = FastAPI(
     title="Pengyn Studio API",
@@ -200,14 +203,19 @@ async def create_checkout(payload: CheckoutPayload):
             },
         }
 
-        logger.info(f"Criando cobrança PIX para {expected_price}")
-        charge = await payment_service.create_pix_charge(
-            email=str(payload.client.email),
-            price=expected_price,
-            order=order,
-        )
-
-        order_id = record_checkout(order, charge["transaction_id"])
+        if not mercado_pago.token and os.getenv("ENABLE_DEMO_PAYMENT", "false").lower() != "true":
+            raise HTTPException(status_code=503, detail="Pagamento indisponível.")
+        order_id = record_checkout(order, f"creating-{uuid.uuid4()}")
+        try:
+            if mercado_pago.token:
+                charge = await mercado_pago.create_pix(order_id, str(payload.client.email), int(expected_price.replace("R$", "").strip().replace(",", "")))
+                attach_payment(order_id, charge["transaction_id"])
+            else:
+                charge = await payment_service.create_pix_charge(email=str(payload.client.email), price=expected_price, order=order)
+                attach_payment(order_id, charge["transaction_id"])
+        except Exception:
+            fail_checkout(order_id)
+            raise
         logger.info(f"Cobrança criada com sucesso: {charge['transaction_id']}")
         return {
             "success": True,
@@ -215,6 +223,8 @@ async def create_checkout(payload: CheckoutPayload):
             "transaction_id": charge["transaction_id"],
             "order_id": order_id,
             "pix_code": charge["pix_copia_e_cola"],
+            "ticket_url": charge.get("ticket_url"),
+            "demo_payment": not bool(mercado_pago.token),
             "order_summary": {
                 "client_email": str(payload.client.email),
                 "instagram": instagram["username"],
@@ -237,7 +247,7 @@ async def simulate_payment(payload: SimulatePaymentRequest):
     """
     Atalho da demo local: marca o PIX mockado como pago e dispara a geração.
     """
-    if os.getenv("ENABLE_DEMO_PAYMENT", "false").lower() != "true":
+    if mercado_pago.token or os.getenv("ENABLE_DEMO_PAYMENT", "false").lower() != "true":
         raise HTTPException(status_code=404, detail="Simulação indisponível.")
     try:
         logger.info(f"Simulando pagamento para transação: {payload.transaction_id}")
@@ -266,7 +276,7 @@ async def simulate_payment(payload: SimulatePaymentRequest):
 
 @app.post("/api/v1/webhook/payment")
 async def payment_webhook(notification: WebhookNotification):
-    if os.getenv("ENABLE_DEMO_PAYMENT", "false").lower() != "true":
+    if mercado_pago.token or os.getenv("ENABLE_DEMO_PAYMENT", "false").lower() != "true":
         raise HTTPException(status_code=404, detail="Webhook de demonstração indisponível.")
     try:
         logger.info(f"Webhook recebido: {notification.event} para transação {notification.transaction_id}")
@@ -296,3 +306,24 @@ async def payment_webhook(notification: WebhookNotification):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+
+
+@app.post("/api/v1/webhooks/mercado-pago")
+async def mercado_pago_webhook(request: Request):
+    if not mercado_pago.token or not mercado_pago.secret:
+        raise HTTPException(status_code=503, detail="Webhook indisponível.")
+    data_id = request.query_params.get("data.id", "")
+    if not mercado_pago.verify_signature(data_id, request.headers.get("x-request-id", ""), request.headers.get("x-signature", "")):
+        raise HTTPException(status_code=401, detail="Assinatura inválida.")
+    body = await request.json()
+    if body.get("type") != "payment" or str(body.get("data", {}).get("id")) != data_id:
+        return {"status": "ignored"}
+    try:
+        payment = await mercado_pago.get_payment(data_id)
+    except Exception:
+        logger.exception("Falha ao consultar pagamento no Mercado Pago")
+        raise HTTPException(status_code=502, detail="Falha ao verificar pagamento.")
+    transaction_id = validate_payment(payment)
+    if transaction_id:
+        queue_paid_order(transaction_id)
+    return {"status": "accepted"}

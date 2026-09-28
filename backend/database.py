@@ -204,3 +204,38 @@ def get_order_by_transaction_id(transaction_id: str):
     with SessionLocal() as db:
         order = db.scalar(select(Order).where(Order.transaction_id == transaction_id))
         return order.id if order else None
+
+
+def attach_payment(order_id: str, payment_id: str):
+    with SessionLocal.begin() as db:
+        order = db.get(Order, order_id)
+        if order is None:
+            raise ValueError("Pedido não encontrado")
+        order.transaction_id = payment_id
+
+
+def fail_checkout(order_id: str):
+    with SessionLocal.begin() as db:
+        order = db.get(Order, order_id)
+        order.status = "payment_error"
+        db.get(Campaign, order.campaign_id).status = "payment_error"
+
+
+def validate_payment(payment: dict) -> str | None:
+    """Check gateway facts against our own order before queuing generation."""
+    from decimal import Decimal
+    payment_id = str(payment.get("id", ""))
+    if not payment_id or payment.get("status") != "approved" or payment.get("payment_method_id") != "pix":
+        return None
+    with SessionLocal() as db:
+        from sqlalchemy import select
+        order = db.scalar(select(Order).where(Order.transaction_id == payment_id))
+        if order is None or payment.get("external_reference") != order.id:
+            return None
+        try:
+            cents = int(Decimal(str(payment["transaction_amount"])) * 100)
+        except (KeyError, ValueError, ArithmeticError):
+            return None
+        if cents != order.amount_cents:
+            return None
+        return order.transaction_id

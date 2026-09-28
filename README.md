@@ -312,3 +312,12 @@ para o servidor. Trate-o como uma senha: qualquer pessoa com esse link pode
 consultar a campanha. O código Pix é recuperável pela rota autenticada
 `GET /api/v1/orders/{id}/payment`. O status tem atualização manual se a espera
 for longa. A entrega por e-mail continua fora desta etapa.
+
+## Interface — etapa 4
+
+A galeria agora mostra cada imagem com número, tema e legenda, além de ações
+para copiar a legenda e solicitar uma nova versão. O ZIP segue disponível para
+baixar a campanha completa. A navegação do briefing inclui retorno entre
+etapas, foco visível para teclado, progresso anunciado e FAQ com estado de
+expansão. As grades se ajustam para celular e tablet e há suporte à preferência
+de movimento reduzido.

@@ -15,6 +15,7 @@
 </head>
 
 <body>
+  <a class="skip-link" href="#onboarding">Ir para criar campanha</a>
 
   <!-- BACKGROUND GLOW -->
   <div class="bg-glow glow-1"></div>
@@ -232,11 +233,11 @@
           Conte sobre seu negócio para montar uma prévia dos posts.
         </p>
 
-        <div class="step-indicator" style="font-weight: 600; color: var(--primary); margin-bottom: 12px; font-size: 0.9rem;">
+        <div class="step-indicator" aria-live="polite" style="font-weight: 600; color: var(--primary); margin-bottom: 12px; font-size: 0.9rem;">
           Etapa 1 de 5
         </div>
 
-        <div class="progress-bar" style="max-width: 600px; margin: 0 auto 40px;">
+        <div class="progress-bar" role="progressbar" aria-label="Progresso do briefing" aria-valuemin="0" aria-valuemax="5" aria-valuenow="1" style="max-width: 600px; margin: 0 auto 40px;">
           <div class="progress"></div>
         </div>
 
@@ -273,6 +274,7 @@
           </div>
 
           <div class="question-block hidden" data-step="2">
+            <button type="button" class="back-step">← Voltar</button>
             <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Qual seu objetivo principal?</h3>
             <div class="chips">
               <button data-value="vendas">Mais vendas</button>
@@ -283,6 +285,7 @@
           </div>
 
           <div class="question-block hidden" data-step="3">
+            <button type="button" class="back-step">← Voltar</button>
             <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Qual estilo visual representa sua marca?</h3>
             <div class="chips">
               <button data-value="premium">Premium</button>
@@ -293,6 +296,7 @@
           </div>
 
           <div class="question-block hidden" data-step="4">
+            <button type="button" class="back-step">← Voltar</button>
             <h3>O que vamos divulgar?</h3>
             <p class="question-helper">Informe dados reais; não inventaremos preços, depoimentos ou ofertas.</p>
             <form id="brand-brief-form" class="brief-form">
@@ -304,6 +308,7 @@
             </form>
           </div>
           <div class="question-block hidden" data-step="5">
+            <button type="button" class="back-step">← Voltar</button>
             <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Escolha seu pacote ideal.</h3>
             <div class="pricing-grid-onboarding">
               <div class="price-card-onboarding">
@@ -432,7 +437,7 @@
           <div id="delivery-panel" class="flow-panel hidden">
             <h3>Artes do pacote</h3>
             <p class="flow-note">Sua campanha está pronta. Baixe as imagens e as legendas ou solicite uma nova versão de um post.</p>
-            <div id="delivery-gallery" class="delivery-gallery"></div>
+            <div id="delivery-gallery" class="delivery-gallery" aria-live="polite"></div>
             <button id="btn-download-campaign" type="button" class="secondary-button">Baixar campanha (.zip)</button>
           </div>
         </div>

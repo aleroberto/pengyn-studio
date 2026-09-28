@@ -19,3 +19,4 @@ Thumbs.db
 # Local order database
 *.db
 *.db-journal
+backend/assets/

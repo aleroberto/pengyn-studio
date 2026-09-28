@@ -229,7 +229,7 @@
 
         <h2>Vamos montar sua estratégia ideal.</h2>
         <p style="margin-bottom: 24px;">
-          Responda rapidamente e nossa IA recomendará os melhores posts para seu negócio.
+          Responda rapidamente e nossa IA montará a jornada de conteúdo ideal para sua marca.
         </p>
 
         <div class="step-indicator" style="font-weight: 600; color: var(--primary); margin-bottom: 12px; font-size: 0.9rem;">
@@ -243,13 +243,32 @@
         <div class="questions-wrapper" style="position: relative; min-height: 180px;">
           
           <div class="question-block" data-step="1">
-            <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Qual é o seu nicho?</h3>
-            <div class="chips">
-              <button data-value="hamburgueria">Hamburgueria</button>
-              <button data-value="barbearia">Barbearia</button>
-              <button data-value="estetica">Estética</button>
-              <button data-value="moda">Moda</button>
-              <button data-value="restaurante">Restaurante</button>
+            <h3 style="margin-bottom: 10px; font-size: 1.4rem;">Qual é o seu nicho?</h3>
+            <p class="question-helper">Escolha uma opção ou informe o seu segmento.</p>
+
+            <div class="chips niche-chips">
+              <button type="button" data-value="hamburgueria">Hamburgueria</button>
+              <button type="button" data-value="barbearia">Barbearia</button>
+              <button type="button" data-value="estetica">Estética</button>
+              <button type="button" data-value="moda">Moda</button>
+              <button type="button" data-value="restaurante">Restaurante</button>
+              <button type="button" id="btn-other-niche" class="other-niche-chip">Outro</button>
+            </div>
+
+            <div id="custom-niche-panel" class="custom-niche-panel hidden">
+              <label for="custom-niche-input">Qual é o seu nicho?</label>
+              <div class="custom-niche-row">
+                <input
+                  type="text"
+                  id="custom-niche-input"
+                  maxlength="80"
+                  placeholder="Ex: Pet shop, Advocacia, Fotografia..."
+                  autocomplete="off"
+                >
+                <button type="button" id="btn-custom-niche-continue" class="primary-button">
+                  Continuar
+                </button>
+              </div>
             </div>
           </div>
 
@@ -307,26 +326,54 @@
           <p style="font-weight: 600; color: var(--primary);">Estruturando pacote ideal...</p>
         </div>
 
-        <div id="result-card" class="result-card hidden">
-          <h2>Estratégia recomendada</h2>
-          <p class="subtitle">
-            Criamos a sequência exata para o seu pacote escolhido.
-          </p>
+        <div id="result-card" class="result-card feed-result-card hidden">
+          <div class="result-intro">
+            <span class="result-eyebrow">ESTRATÉGIA CRIADA</span>
+            <h2>Seu próximo feed começa aqui.</h2>
+            <p class="subtitle">
+              Uma sequência de conteúdo pensada para conduzir atenção até a ação.
+            </p>
+          </div>
 
           <div class="strategy-context">
-            <div><strong>Objetivo:</strong> <span id="out-goal">-</span></div>
             <div><strong>Nicho:</strong> <span id="out-niche">-</span></div>
+            <div><strong>Objetivo:</strong> <span id="out-goal">-</span></div>
+            <div><strong>Estilo:</strong> <span id="out-style">-</span></div>
             <div><strong>Pacote:</strong> <span id="out-quantity">-</span></div>
           </div>
 
-          <div class="strategy-grid" id="dynamic-grid">
-            <!-- Cards injetados via JS -->
+          <div class="feed-preview-shell">
+            <div class="feed-preview-header">
+              <div>
+                <span class="feed-preview-label">MAPA VISUAL DO FEED</span>
+                <h3>Seu plano de conteúdo</h3>
+              </div>
+              <span class="feed-preview-count" id="feed-preview-count">- posts</span>
+            </div>
+
+            <div class="strategy-grid feed-strategy-grid" id="dynamic-grid">
+              <!-- Tiles do mapa visual injetados via JS -->
+            </div>
+
+            <div class="strategy-journey" aria-label="Jornada estratégica">
+              <span>Atenção</span>
+              <span class="journey-arrow">→</span>
+              <span>Interesse</span>
+              <span class="journey-arrow">→</span>
+              <span>Confiança</span>
+              <span class="journey-arrow">→</span>
+              <span>Ação</span>
+            </div>
           </div>
 
-          <!-- NOVOS BOTÕES DE AÇÃO DA ENGINE -->
+          <div class="result-conversion-copy">
+            <strong>A estratégia está pronta.</strong>
+            <span>Agora transforme esse plano em posts exclusivos para a sua marca.</span>
+          </div>
+
           <div class="result-actions">
-            <button type="button" id="btn-checkout" class="primary-button">Contratar Pacote</button>
-            <button type="button" id="btn-restart" class="secondary-button">Refazer Estratégia</button>
+            <button type="button" id="btn-checkout" class="primary-button">Criar meus posts</button>
+            <button type="button" id="btn-restart" class="secondary-button">Refazer estratégia</button>
           </div>
 
           <div id="checkout-panel" class="flow-panel hidden">

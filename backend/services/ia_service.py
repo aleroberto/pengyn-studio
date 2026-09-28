@@ -1,4 +1,6 @@
 import asyncio
+import base64
+import json
 import logging
 import os
 
@@ -20,9 +22,9 @@ MOCK_IMAGES = [
 
 class IAService:
     def __init__(self):
-        self.api_key = os.getenv("IA_API_KEY", MOCK_KEY)
+        self.api_key = os.getenv("OPENAI_API_KEY") or os.getenv("IA_API_KEY", MOCK_KEY)
         self.api_url = "https://api.openai.com/v1/images/generations"
-        self.model = os.getenv("IA_IMAGE_MODEL", "dall-e-3")
+        self.model = os.getenv("IA_IMAGE_MODEL", "gpt-image-2")
 
     def _prompt(self, niche: str, style: str, title: str, goal: str) -> str:
         goal_part = f" Marketing goal: {goal}." if goal else ""
@@ -107,3 +109,34 @@ class IAService:
                 "status": "error",
                 "message": "Erro inesperado ao gerar imagens. Tente novamente.",
             }
+
+    async def generate_campaign(self, niche: str, style: str, titles: list[str], goal: str, storage) -> list[dict]:
+        """Create copy and durable images. Mock output is explicit local demo only."""
+        if self.api_key == MOCK_KEY:
+            if os.getenv("ALLOW_MOCK_GENERATION", "false").lower() != "true":
+                raise RuntimeError("Configure OPENAI_API_KEY para gerar campanhas reais.")
+            return [{"title": title, "caption": f"Conheça {title}.", "visual_prompt": self._prompt(niche, style, title, goal), "image_url": MOCK_IMAGES[i % len(MOCK_IMAGES)]} for i, title in enumerate(titles)]
+
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+        posts = []
+        async with httpx.AsyncClient(timeout=180.0) as client:
+            for title in titles:
+                copy_response = await client.post("https://api.openai.com/v1/chat/completions", headers=headers, json={
+                    "model": os.getenv("IA_TEXT_MODEL", "gpt-4o-mini"),
+                    "response_format": {"type": "json_object"},
+                    "messages": [
+                        {"role": "system", "content": "Você cria campanhas para pequenos negócios. Responda apenas JSON com as chaves caption e visual_prompt. Não invente preços, avaliações ou informações sobre o negócio."},
+                        {"role": "user", "content": f"Crie legenda em português e prompt visual detalhado para um post sobre {niche}. Estilo: {style}. Tema: {title}. Objetivo: {goal}."},
+                    ],
+                })
+                copy_response.raise_for_status()
+                concept = json.loads(copy_response.json()["choices"][0]["message"]["content"])
+                prompt = str(concept["visual_prompt"])[:2000]
+                image_response = await client.post(self.api_url, headers=headers, json={
+                    "model": self.model, "prompt": prompt, "size": "1024x1024", "quality": os.getenv("IA_IMAGE_QUALITY", "medium"), "n": 1,
+                })
+                image_response.raise_for_status()
+                encoded = image_response.json()["data"][0]["b64_json"]
+                image_url = storage.save(base64.b64decode(encoded, validate=True))
+                posts.append({"title": title[:200], "caption": str(concept["caption"])[:2000], "visual_prompt": prompt, "image_url": image_url})
+        return posts

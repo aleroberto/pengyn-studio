@@ -1,19 +1,22 @@
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field, ValidationError
 import logging
 import uuid
+import io
+import zipfile
 import os
 from pathlib import Path
 import uvicorn
 
-from database import attach_payment, fail_checkout, get_order, get_delivery, get_order_by_transaction_id, queue_paid_order, record_checkout, validate_payment
+from database import attach_payment, check_order_access, fail_checkout, get_asset_keys, get_order, get_payment_instructions, get_delivery, get_order_by_transaction_id, issue_order_access, queue_paid_order, record_checkout, request_regeneration, save_payment_instructions, validate_payment
 from services.ia_service import IAService
 from services.instagram_service import InstagramService
 from services.payment_service import PRICE_MAP, PaymentService
 from services.mercado_pago import MercadoPagoService
+from services.storage import ImageStorage
 
 # Configuração de logging
 logging.basicConfig(
@@ -75,9 +78,13 @@ class ClientData(BaseModel):
 
 
 class PostConfig(BaseModel):
-    niche: str
-    style: str
-    title: str
+    niche: str = Field(min_length=2, max_length=100)
+    style: str = Field(min_length=2, max_length=100)
+    title: str = Field(min_length=2, max_length=200)
+    product: str = Field(default="", max_length=120)
+    audience: str = Field(default="", max_length=120)
+    colors: str = Field(default="", max_length=120)
+    notes: str = Field(default="", max_length=500)
     goal: str = ""
     titles: list[str] = Field(default_factory=list)
 
@@ -125,11 +132,27 @@ async def _fulfill_order(charge: dict) -> dict:
 
 @app.get("/")
 def read_root():
-    return {"status": "online", "message": "Bem-vindo à API do Pengyn Studio!"}
+    return {"status": "online", "message": "Bem-vindo à API do Pengyn Studio!", "payment_mode": "live" if mercado_pago.token else "demo" if os.getenv("ENABLE_DEMO_PAYMENT", "false").lower() == "true" else "unavailable"}
+
+
+def require_order_access(order_id: str, request: Request):
+    token = request.headers.get("X-Order-Token", "")
+    if not check_order_access(order_id, token):
+        raise HTTPException(status_code=403, detail="Acesso ao pedido negado.")
+
+
+@app.get("/api/v1/orders/{order_id}/payment")
+def read_payment_instructions(order_id: str, request: Request):
+    require_order_access(order_id, request)
+    instructions = get_payment_instructions(order_id)
+    if instructions is None:
+        raise HTTPException(status_code=404, detail="Dados de pagamento não encontrados.")
+    return instructions
 
 
 @app.get("/api/v1/orders/{order_id}/delivery")
-def read_delivery(order_id: str):
+def read_delivery(order_id: str, request: Request):
+    require_order_access(order_id, request)
     result = get_delivery(order_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Pedido não encontrado.")
@@ -137,11 +160,40 @@ def read_delivery(order_id: str):
 
 
 @app.get("/api/v1/orders/{order_id}")
-def read_order(order_id: str):
+def read_order(order_id: str, request: Request):
+    require_order_access(order_id, request)
     order = get_order(order_id)
     if order is None:
         raise HTTPException(status_code=404, detail="Pedido não encontrado.")
     return order
+
+
+@app.post("/api/v1/orders/{order_id}/posts/{position}/regenerate")
+def regenerate_post(order_id: str, position: int, request: Request):
+    require_order_access(order_id, request)
+    if not request_regeneration(order_id, position):
+        raise HTTPException(status_code=409, detail="Regeneração indisponível para este post.")
+    return {"status": "queued"}
+
+
+@app.get("/api/v1/orders/{order_id}/download")
+def download_campaign(order_id: str, request: Request):
+    require_order_access(order_id, request)
+    delivery = get_delivery(order_id)
+    if not delivery or delivery["status"] != "ready":
+        raise HTTPException(status_code=409, detail="Campanha ainda não está pronta.")
+    assets = get_asset_keys(order_id)
+    buffer = io.BytesIO()
+    storage = ImageStorage()
+    try:
+        with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for asset in assets:
+                archive.writestr(f"post-{asset['position'] + 1}.png", storage.read(asset["image_url"]))
+            archive.writestr("legendas.txt", "\n\n".join(f"Post {a['position'] + 1} — {a['title']}\n{a['caption']}" for a in assets))
+    except (OSError, ValueError, KeyError):
+        raise HTTPException(status_code=503, detail="Arquivos indisponíveis para download.")
+    buffer.seek(0)
+    return StreamingResponse(buffer, media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="pengyn-{order_id}.zip"'})
 
 
 @app.post("/api/v1/validate-instagram")
@@ -191,6 +243,10 @@ async def create_checkout(payload: CheckoutPayload):
                 "title": payload.config.title,
                 "goal": payload.config.goal,
                 "titles": payload.config.titles,
+                "product": payload.config.product,
+                "audience": payload.config.audience,
+                "colors": payload.config.colors,
+                "notes": payload.config.notes,
             },
             "client": {
                 "instagram": instagram["username"],
@@ -216,12 +272,15 @@ async def create_checkout(payload: CheckoutPayload):
         except Exception:
             fail_checkout(order_id)
             raise
+        save_payment_instructions(order_id, charge["pix_copia_e_cola"], charge.get("ticket_url"), not bool(mercado_pago.token))
+        access_token = issue_order_access(order_id)
         logger.info(f"Cobrança criada com sucesso: {charge['transaction_id']}")
         return {
             "success": True,
             "message": "Cobrança gerada com sucesso! Aguardando pagamento.",
             "transaction_id": charge["transaction_id"],
             "order_id": order_id,
+            "order_token": access_token,
             "pix_code": charge["pix_copia_e_cola"],
             "ticket_url": charge.get("ticket_url"),
             "demo_payment": not bool(mercado_pago.token),

@@ -276,3 +276,39 @@ Com token configurado, os endpoints de simulação são bloqueados. **Não aceit
 pagamentos reais antes de validar a integração em conta de testes e configurar
 banco, worker e storage persistentes no mesmo ambiente.** A API na Vercel
 sem worker contínuo não processa a campanha.
+
+## M4 — entrega ao cliente
+
+O checkout retorna `order_token` uma única vez. A interface o guarda na sessão
+do navegador para acompanhar o pedido, consultar a galeria, pedir **uma** nova
+versão por post e baixar imagens e legendas em ZIP. As rotas de pedido exigem
+`X-Order-Token`; somente o hash do token é salvo no banco. Salve o token de
+forma segura caso precise recuperar o pedido fora da sessão atual. Esse acesso
+por token é provisório; histórico e login ficam para o M5.
+
+Rotas: `GET /api/v1/orders/{id}/delivery`, `POST /api/v1/orders/{id}/posts/{position}/regenerate`
+e `GET /api/v1/orders/{id}/download`. O ZIP usa o mesmo storage da geração.
+Pedidos criados antes do M4 não possuem token e exigem uma estratégia de
+migração antes de disponibilizá-los na nova interface. Em ambiente de demo,
+as imagens ilustrativas externas não são armazenadas localmente; download
+completo requer geração real e storage configurado.
+
+## Interface — etapas 1 e 2
+
+A página apresenta o modo de pagamento informado pela API (`payment_mode`:
+`live`, `demo` ou `unavailable`) e diferencia exemplos visuais da campanha
+criada para o cliente. A prévia da campanha é montada localmente a partir de
+segmento, produto, público e objetivo; ela **não** chama a IA antes do pagamento.
+O briefing completo é salvo em `campaign_briefs` e entregue ao worker para
+orientar as legendas e os prompts visuais. A tabela adicional é criada no
+bootstrap atual; antes de operar com dados em produção, use migrações versionadas.
+
+## Interface — etapa 3
+
+A página mostra preços antes do briefing, resume o pedido antes de gerar o Pix,
+e permite copiar um link de acesso ao pedido. O link inclui o token no fragmento
+(`#`): o navegador o lê e remove da barra após abrir; ele não é enviado na URL
+para o servidor. Trate-o como uma senha: qualquer pessoa com esse link pode
+consultar a campanha. O código Pix é recuperável pela rota autenticada
+`GET /api/v1/orders/{id}/payment`. O status tem atualização manual se a espera
+for longa. A entrega por e-mail continua fora desta etapa.

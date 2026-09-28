@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const textElement = document.querySelector(".dynamic-text");
-  const words = ["posts que vendem", "imagens exclusivas", "designs premium"];
+  const words = ["posts para sua marca", "uma campanha visual", "imagens e legendas"];
 
   let wordIndex = 0;
   let charIndex = words[wordIndex].length;
@@ -87,6 +87,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   let state = createEmptyState();
+  let paymentMode = "unavailable";
+  const modeLabel = document.querySelector(".engine-status");
+  const faqPix = document.getElementById("faq-pix-answer");
+  const checkoutSubmit = document.getElementById("btn-submit-checkout");
+  fetch(`${API_BASE}/`)
+    .then((response) => { if (!response.ok) throw new Error("API indisponível"); return response.json(); })
+    .then((data) => {
+      paymentMode = data.payment_mode || "unavailable";
+      if (paymentMode === "live") {
+        modeLabel.textContent = "Pagamento Pix disponível";
+        faqPix.textContent = "Sim. O código Pix é emitido pelo Mercado Pago. A geração começa após a confirmação do pagamento.";
+        checkoutSubmit.textContent = "Gerar Pix do pedido";
+      } else if (paymentMode === "demo") {
+        modeLabel.textContent = "Demonstração · sem cobrança";
+        faqPix.textContent = "Nesta demonstração, o Pix é fictício e o pagamento pode ser simulado para testar o fluxo.";
+        checkoutSubmit.textContent = "Gerar Pix de demonstração";
+      } else {
+        modeLabel.textContent = "Pedidos temporariamente indisponíveis";
+        faqPix.textContent = "O checkout está indisponível no momento. Você ainda pode explorar a prévia da campanha.";
+        checkoutSubmit.disabled = true;
+      }
+    })
+    .catch(() => {
+      modeLabel.textContent = "Serviço temporariamente indisponível";
+      faqPix.textContent = "Não foi possível confirmar a disponibilidade do checkout. Tente novamente mais tarde.";
+      checkoutSubmit.disabled = true;
+    });
   let preferredQuantity = null;
 
   const prices = {
@@ -145,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateProgress(currentIndex + 2);
 
-    if (currentIndex + 1 === 3) {
+    if (currentIndex + 1 === 4) {
       highlightPreferredQuantity();
     }
   }
@@ -180,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", () => {
 
         // Etapa 4: seleção do pacote
-        if (index === 3) {
+        if (index === 4) {
           const planCards = step.querySelectorAll(".price-card-onboarding");
 
           planCards.forEach((card) => {
@@ -274,11 +301,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  document.getElementById("brand-brief-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    state.product = document.getElementById("brief-product").value.trim();
+    state.audience = document.getElementById("brief-audience").value.trim();
+    state.colors = document.getElementById("brief-colors").value.trim();
+    state.notes = document.getElementById("brief-notes").value.trim();
+    if (state.product) goToNextStep(3);
+  });
+
   function createEmptyState() {
     return {
       niche: null,
       goal: null,
       style: null,
+      product: null,
+      audience: "",
+      colors: "",
+      notes: "",
       quantity: null,
       title: null,
       titles: [],
@@ -288,6 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
       price: null,
       transactionId: null,
       orderId: null,
+      orderToken: null,
       pixCode: null
     };
   }
@@ -296,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!preferredQuantity) return;
 
     const qtyStep = document.querySelector(
-      '.question-block[data-step="4"]'
+      '.question-block[data-step="5"]'
     );
 
     if (!qtyStep || qtyStep.classList.contains("hidden")) {
@@ -696,6 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const outNiche = document.getElementById("out-niche");
     const outGoal = document.getElementById("out-goal");
     const outStyle = document.getElementById("out-style");
+    document.getElementById("out-product").textContent = state.product;
     const outQuantity = document.getElementById("out-quantity");
 
     if (outNiche) {
@@ -763,14 +805,17 @@ document.addEventListener("DOMContentLoaded", () => {
         </article>
       `;
 
-      gridContainer.insertAdjacentHTML(
-        "beforeend",
-        cardHTML
-      );
+      gridContainer.insertAdjacentHTML("beforeend", cardHTML);
+      const tile = gridContainer.lastElementChild;
+      const desc = tile.querySelector(".feed-tile-desc");
+      desc.textContent = `${item.desc} Tema aplicado a ${state.product}${state.audience ? ` para ${state.audience}` : ""}.`;
+      if (["Prova", "Oferta", "Urgência"].includes(item.title)) {
+        tile.querySelector(".feed-tile-title").textContent = item.title === "Prova" ? "Como funciona" : "Convite";
+      }
     });
 
     state.titles = selectedStrategy.map(
-      (item, index) => `${index + 1}. ${item.title}`
+      (item, index) => `${index + 1}. ${item.title} — ${state.product}`
     );
 
     state.title =
@@ -831,6 +876,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (checkoutForm) {
       checkoutForm.reset();
     }
+    sessionStorage.removeItem("pengyn_order");
+    document.getElementById("result-card")?.classList.remove("order-recovery");
+    document.querySelector("#result-card .result-intro h2").textContent = "Confira os temas da campanha.";
 
     if (checkoutPanel) {
       checkoutPanel.classList.add("hidden");
@@ -1063,9 +1111,13 @@ document.addEventListener("DOMContentLoaded", () => {
           deliveryPanel.classList.add("hidden");
         }
 
-        checkoutPanel.classList.remove(
-          "hidden"
-        );
+        checkoutPanel.classList.remove("hidden");
+        const summary = document.getElementById("checkout-summary");
+        summary.replaceChildren();
+        [`Produto: ${state.product}`, `Pacote: ${state.quantity} posts`, `Total: ${state.price}`,
+          "Entrega: galeria e ZIP após confirmação e geração"].forEach((line) => {
+          const p = document.createElement("p"); p.textContent = line; summary.append(p);
+        });
 
         checkoutPanel.scrollIntoView({
           behavior: "smooth",
@@ -1128,7 +1180,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 goal:
                   state.goal || "",
                 titles:
-                  state.titles
+                  state.titles,
+                product: state.product,
+                audience: state.audience,
+                colors: state.colors,
+                notes: state.notes
               },
 
               client: {
@@ -1154,9 +1210,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
           state.orderId =
             data.order_id;
+          state.orderToken = data.order_token;
+          sessionStorage.setItem("pengyn_order", JSON.stringify({id: state.orderId, token: state.orderToken}));
+          showOrderLink();
+          showTicket(data.ticket_url);
+          document.getElementById("btn-simulate-payment").classList.toggle("hidden", !data.demo_payment);
+          document.getElementById("pix-explanation").textContent = data.demo_payment
+            ? "PIX de demonstração: este código não é pagável. Use o botão de simulação."
+            : "Pague o Pix e acompanhe a confirmação nesta página.";
+          if (!data.demo_payment) followOrder();
 
           state.pixCode =
             data.pix_code;
+          document.getElementById("order-reference").textContent = `Pedido ${state.orderId} · guarde esta página até baixar sua campanha.`;
 
           const transactionOutput =
             document.getElementById(
@@ -1258,73 +1324,172 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderDelivery(images) {
-  if (!deliveryGallery) {
-    return;
-  }
-
-  deliveryGallery.replaceChildren();
-
-  images.forEach((item) => {
-    const figure = document.createElement("figure");
-    figure.className = "delivery-card";
-
-    const img = document.createElement("img");
-    img.src = new URL(item.image_url, API_BASE).href;
-    img.alt = item.title;
-
-    const caption = document.createElement("figcaption");
-    caption.textContent = item.title;
-
-    figure.append(img, caption);
-    deliveryGallery.append(figure);
-  });
-
-  if (deliveryPanel) {
-    deliveryPanel.classList.remove(
-      "hidden"
-    );
-
-    deliveryPanel.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest"
+    if (!deliveryGallery) return;
+    deliveryGallery.replaceChildren();
+    images.forEach((item) => {
+      const figure = document.createElement("figure");
+      figure.className = "delivery-card";
+      const img = document.createElement("img");
+      img.src = new URL(item.image_url, API_BASE).href;
+      img.alt = item.title;
+      const caption = document.createElement("figcaption");
+      caption.textContent = item.title;
+      const text = document.createElement("p");
+      text.textContent = item.caption || "";
+      const regen = document.createElement("button");
+      regen.type = "button";
+      regen.className = "secondary-button";
+      regen.textContent = item.regeneration_status === "completed" ? "Nova versão entregue" : item.regeneration_status ? "Nova versão em andamento" : "Gerar nova versão";
+      regen.disabled = Boolean(item.regeneration_status);
+      regen.addEventListener("click", async () => {
+        regen.disabled = true;
+        try {
+          const response = await fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(state.orderId)}/posts/${item.position}/regenerate`, {
+            method: "POST", headers: {"X-Order-Token": state.orderToken}
+          });
+          if (!response.ok) throw new Error("Não foi possível solicitar a nova versão.");
+          regen.textContent = "Gerando nova versão...";
+          const images = await waitForRegeneration(state.orderId, item.position);
+          renderDelivery(images);
+        } catch (err) { showError(pixError, err.message); }
+      });
+      figure.append(img, caption, text, regen);
+      deliveryGallery.append(figure);
     });
-  }
-}
-
-async function waitForDelivery(orderId) {
-  for (let attempt = 0; attempt < 120; attempt++) {
-    const response = await fetch(
-      `${API_BASE}/api/v1/orders/${encodeURIComponent(orderId)}/delivery`
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        "Não foi possível consultar o pedido."
-      );
-    }
-
-    const delivery = await response.json();
-
-    if (delivery.status === "ready") {
-      return delivery.images;
-    }
-
-    if (delivery.status === "failed") {
-      throw new Error(
-        delivery.error ||
-        "Falha na geração da campanha."
-      );
-    }
-
-    await new Promise((resolve) =>
-      setTimeout(resolve, 3000)
-    );
+    deliveryPanel.classList.remove("hidden");
+    deliveryPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
-  throw new Error(
-    "A geração continua em andamento. Consulte o pedido novamente em alguns minutos."
-  );
-}
+  async function waitForRegeneration(orderId, position) {
+    for (let attempt = 0; attempt < 120; attempt++) {
+      const response = await fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(orderId)}/delivery`, {headers: {"X-Order-Token": state.orderToken}});
+      if (!response.ok) throw new Error("Falha ao consultar a nova versão.");
+      const delivery = await response.json();
+      const post = delivery.images.find((item) => item.position === position);
+      if (post?.regeneration_status === "completed") return delivery.images;
+      if (post?.regeneration_status === "failed") throw new Error("A nova versão falhou. Entre em contato com o suporte.");
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+    throw new Error("A nova versão continua em andamento.");
+  }
+
+  async function waitForDelivery(orderId) {
+    for (let attempt = 0; attempt < 120; attempt++) {
+      const response = await fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(orderId)}/delivery`, {
+        headers: {"X-Order-Token": state.orderToken}
+      });
+      if (!response.ok) throw new Error("Não foi possível consultar o pedido.");
+      const delivery = await response.json();
+      document.getElementById("order-progress").textContent = {
+        awaiting_payment: "Aguardando pagamento", queued: "Pagamento confirmado · aguardando geração",
+        generating: "Criando a campanha", ready: "Campanha pronta", payment_error: "Falha ao gerar Pix"
+      }[delivery.status] || "Aguardando atualização";
+      if (delivery.status === "ready") return delivery.images;
+      if (delivery.status === "payment_error") throw new Error("Houve um problema com o pagamento. Entre em contato com o atendimento.");
+      if (delivery.status === "failed") throw new Error(delivery.error || "Falha na geração da campanha.");
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+    throw new Error("O pedido continua em andamento. Sua campanha poderá levar alguns minutos para ficar pronta.");
+  }
+
+  function orderLink() {
+    const fragment = new URLSearchParams({pedido: state.orderId, acesso: state.orderToken});
+    return `${location.origin}${location.pathname}#${fragment.toString()}`;
+  }
+
+  function showOrderLink() {
+    document.getElementById("order-reference").textContent = `Pedido ${state.orderId} · salve o link de acesso.`;
+  }
+
+  function showTicket(url) {
+    const link = document.getElementById("payment-ticket");
+    if (url && /^https:\/\//.test(url)) {
+      link.href = url;
+      link.classList.remove("hidden");
+    } else {
+      link.removeAttribute("href");
+      link.classList.add("hidden");
+    }
+  }
+
+  let followInProgress = false;
+  async function followOrder() {
+    if (followInProgress || !state.orderId || !state.orderToken) return;
+    followInProgress = true;
+    hideError(pixError);
+    try {
+      renderDelivery(await waitForDelivery(state.orderId));
+    } catch (err) {
+      showError(pixError, `${err.message} Use “Atualizar acompanhamento” para consultar novamente.`);
+    } finally { followInProgress = false; }
+  }
+
+  document.getElementById("btn-copy-order-link")?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(orderLink());
+      document.getElementById("btn-copy-order-link").textContent = "Link copiado";
+    } catch (_) { showError(pixError, "Não foi possível copiar o link neste navegador."); }
+  });
+  document.getElementById("btn-refresh-order")?.addEventListener("click", followOrder);
+
+  async function restoreOrder() {
+    const fragment = new URLSearchParams(location.hash.slice(1));
+    const saved = sessionStorage.getItem("pengyn_order");
+    let access = null;
+    try { access = saved ? JSON.parse(saved) : null; } catch (_) { sessionStorage.removeItem("pengyn_order"); }
+    if (fragment.get("pedido") && fragment.get("acesso")) {
+      access = {id: fragment.get("pedido"), token: fragment.get("acesso")};
+      sessionStorage.setItem("pengyn_order", JSON.stringify(access));
+      history.replaceState(null, "", location.pathname + location.search);
+    }
+    if (!access?.id || !access?.token) return;
+    state.orderId = access.id;
+    state.orderToken = access.token;
+    try {
+      const headers = {"X-Order-Token": state.orderToken};
+      const [orderResponse, paymentResponse] = await Promise.all([
+        fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(state.orderId)}`, {headers}),
+        fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(state.orderId)}/payment`, {headers})
+      ]);
+      if (!orderResponse.ok || !paymentResponse.ok) throw new Error("Link do pedido inválido ou indisponível.");
+      const order = await orderResponse.json();
+      const payment = await paymentResponse.json();
+      state.transactionId = order.transaction_id;
+      state.pixCode = payment.pix_code;
+      document.getElementById("out-transaction-id").textContent = state.transactionId;
+      document.getElementById("out-pix-code").value = state.pixCode;
+      document.getElementById("btn-simulate-payment").classList.toggle("hidden", !payment.demo_payment);
+      document.getElementById("pix-explanation").textContent = payment.demo_payment
+        ? "Pix de demonstração: este código não é pagável. Use o botão de simulação."
+        : "Acompanhe a confirmação do pagamento nesta página.";
+      showTicket(payment.ticket_url);
+      showOrderLink();
+      document.getElementById("result-card").classList.remove("hidden");
+      document.getElementById("result-card").classList.add("order-recovery");
+      document.querySelector("#result-card .result-intro h2").textContent = "Seu pedido";
+      pixPanel.classList.remove("hidden");
+      pixPanel.scrollIntoView({behavior: "smooth", block: "start"});
+      followOrder();
+    } catch (err) {
+      document.getElementById("result-card").classList.remove("hidden");
+      document.getElementById("result-card").classList.add("order-recovery");
+      document.querySelector("#result-card .result-intro h2").textContent = "Seu pedido";
+      pixPanel.classList.remove("hidden");
+      showError(pixError, err.message);
+    }
+  }
+  restoreOrder();
+
+  document.getElementById("btn-download-campaign")?.addEventListener("click", async () => {
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(state.orderId)}/download`, {headers: {"X-Order-Token": state.orderToken}});
+      if (!response.ok) throw new Error("Não foi possível baixar a campanha.");
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = url; link.download = `pengyn-${state.orderId}.zip`; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (err) { showError(pixError, err.message); }
+  });
 
   const btnSimulate =
     document.getElementById(
@@ -1355,11 +1520,7 @@ async function waitForDelivery(orderId) {
             }
           );
 
-         const images = await waitForDelivery(
-            data.order_id || state.orderId
-      );
-
-          renderDelivery(images);
+          await followOrder();
 
         } catch (err) {
 

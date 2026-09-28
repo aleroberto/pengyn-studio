@@ -110,8 +110,9 @@ class IAService:
                 "message": "Erro inesperado ao gerar imagens. Tente novamente.",
             }
 
-    async def generate_campaign(self, niche: str, style: str, titles: list[str], goal: str, storage) -> list[dict]:
+    async def generate_campaign(self, niche: str, style: str, titles: list[str], goal: str, storage, brief: dict | None = None) -> list[dict]:
         """Create copy and durable images. Mock output is explicit local demo only."""
+        brief = brief or {}
         if self.api_key == MOCK_KEY:
             if os.getenv("ALLOW_MOCK_GENERATION", "false").lower() != "true":
                 raise RuntimeError("Configure OPENAI_API_KEY para gerar campanhas reais.")
@@ -126,7 +127,9 @@ class IAService:
                     "response_format": {"type": "json_object"},
                     "messages": [
                         {"role": "system", "content": "Você cria campanhas para pequenos negócios. Responda apenas JSON com as chaves caption e visual_prompt. Não invente preços, avaliações ou informações sobre o negócio."},
-                        {"role": "user", "content": f"Crie legenda em português e prompt visual detalhado para um post sobre {niche}. Estilo: {style}. Tema: {title}. Objetivo: {goal}."},
+                        {"role": "user", "content": f"Crie legenda em português e prompt visual detalhado para um post sobre {niche}. Estilo: {style}. Tema: {title}. Objetivo: {goal}. "
+                         f"Produto/serviço: {brief.get('product', '')}. Público: {brief.get('audience', '')}. "
+                         f"Cores: {brief.get('colors', '')}. Orientações fornecidas pelo cliente: {brief.get('notes', '')}."},
                     ],
                 })
                 copy_response.raise_for_status()

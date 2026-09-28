@@ -62,6 +62,12 @@ class Order(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class CampaignBrief(Base):
+    __tablename__ = "campaign_briefs"
+    campaign_id: Mapped[str] = mapped_column(ForeignKey("campaigns.id"), primary_key=True)
+    details: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
 def init_db():
     Base.metadata.create_all(engine)
 
@@ -82,6 +88,7 @@ def record_checkout(order_data: dict, transaction_id: str) -> str:
         campaign = Campaign(brand_id=brand.id, title=config["title"], style=config["style"], goal=config["goal"], titles=config["titles"], status="awaiting_payment")
         db.add(campaign)
         db.flush()
+        db.add(CampaignBrief(campaign_id=campaign.id, details={key: config.get(key, "") for key in ("product", "audience", "colors", "notes")}))
         amount_cents = int(purchase["price"].replace("R$", "").strip().replace(",", ""))
         order = Order(campaign_id=campaign.id, transaction_id=transaction_id, quantity=int(purchase["quantity"]), amount_cents=amount_cents)
         db.add(order)
@@ -163,7 +170,8 @@ def claim_job():
         campaign = db.get(Campaign, order.campaign_id)
         brand = db.get(Brand, campaign.brand_id)
         campaign.status = "generating"
-        return {"job_id": job.id, "order_id": order.id, "campaign_id": campaign.id, "niche": brand.niche, "style": campaign.style, "title": campaign.title, "goal": campaign.goal, "titles": campaign.titles, "quantity": order.quantity}
+        brief = db.get(CampaignBrief, campaign.id)
+        return {"brief": brief.details if brief else {}, "job_id": job.id, "order_id": order.id, "campaign_id": campaign.id, "niche": brand.niche, "style": campaign.style, "title": campaign.title, "goal": campaign.goal, "titles": campaign.titles, "quantity": order.quantity}
 
 
 def complete_job(job_id: str, posts: list[dict]):
@@ -196,7 +204,9 @@ def get_delivery(order_id: str):
         campaign = db.get(Campaign, order.campaign_id)
         assets = db.scalars(select(Asset).where(Asset.campaign_id == campaign.id).order_by(Asset.position)).all()
         job = db.scalar(select(GenerationJob).where(GenerationJob.order_id == order_id))
-        return {"order_id": order_id, "status": campaign.status, "images": [{"title": asset.title, "caption": asset.caption, "image_url": asset.image_url} for asset in assets], "error": job.error if job and job.status == "failed" else None}
+        regenerations = db.scalars(select(Regeneration).where(Regeneration.campaign_id == campaign.id)).all()
+        regen_by_position = {regen.position: regen for regen in regenerations}
+        return {"order_id": order_id, "payment_status": order.status, "status": campaign.status, "images": [{"title": asset.title, "caption": asset.caption, "image_url": asset.image_url, "position": asset.position, "regeneration_status": regen_by_position[asset.position].status if asset.position in regen_by_position else None} for asset in assets], "error": job.error if job and job.status == "failed" else None}
 
 
 def get_order_by_transaction_id(transaction_id: str):
@@ -239,3 +249,117 @@ def validate_payment(payment: dict) -> str | None:
         if cents != order.amount_cents:
             return None
         return order.transaction_id
+
+class OrderAccess(Base):
+    __tablename__ = "order_access"
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"), primary_key=True)
+    token_hash: Mapped[str] = mapped_column(String(64))
+
+
+class Regeneration(Base):
+    __tablename__ = "regenerations"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    campaign_id: Mapped[str] = mapped_column(ForeignKey("campaigns.id"), index=True)
+    position: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(32), default="pending")
+    error: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+
+def issue_order_access(order_id: str) -> str:
+    import hashlib
+    import secrets
+    init_db()
+    token = secrets.token_urlsafe(32)
+    with SessionLocal.begin() as db:
+        db.add(OrderAccess(order_id=order_id, token_hash=hashlib.sha256(token.encode()).hexdigest()))
+    return token
+
+
+def check_order_access(order_id: str, token: str) -> bool:
+    import hashlib
+    import hmac
+    if not token:
+        return False
+    with SessionLocal() as db:
+        grant = db.get(OrderAccess, order_id)
+        return bool(grant and hmac.compare_digest(grant.token_hash, hashlib.sha256(token.encode()).hexdigest()))
+
+
+def request_regeneration(order_id: str, position: int) -> bool:
+    from sqlalchemy import select
+    init_db()
+    with SessionLocal.begin() as db:
+        order = db.get(Order, order_id)
+        if order is None or order.status != "paid" or position < 0 or position >= order.quantity:
+            return False
+        campaign = db.get(Campaign, order.campaign_id)
+        if campaign.status != "ready":
+            return False
+        asset = db.scalar(select(Asset).where(Asset.campaign_id == campaign.id, Asset.position == position))
+        previous = db.scalar(select(Regeneration).where(Regeneration.campaign_id == campaign.id, Regeneration.position == position))
+        if not asset or previous:
+            return False
+        db.add(Regeneration(campaign_id=campaign.id, position=position))
+        return True
+
+
+def claim_regeneration():
+    from sqlalchemy import select
+    with SessionLocal.begin() as db:
+        query = select(Regeneration).where(Regeneration.status == "pending").order_by(Regeneration.id).limit(1)
+        if not DATABASE_URL.startswith("sqlite"):
+            query = query.with_for_update(skip_locked=True)
+        regeneration = db.scalar(query)
+        if regeneration is None:
+            return None
+        regeneration.status = "running"
+        campaign = db.get(Campaign, regeneration.campaign_id)
+        brand = db.get(Brand, campaign.brand_id)
+        asset = db.scalar(select(Asset).where(Asset.campaign_id == campaign.id, Asset.position == regeneration.position))
+        brief = db.get(CampaignBrief, campaign.id)
+        return {"brief": brief.details if brief else {}, "id": regeneration.id, "campaign_id": campaign.id, "position": regeneration.position, "title": asset.title, "niche": brand.niche, "style": campaign.style, "goal": campaign.goal}
+
+
+def finish_regeneration(regeneration_id: str, post: dict | None, error: str = ""):
+    from sqlalchemy import select
+    with SessionLocal.begin() as db:
+        regeneration = db.get(Regeneration, regeneration_id)
+        if post is None:
+            regeneration.status = "failed"
+            regeneration.error = error[:500]
+            return
+        asset = db.scalar(select(Asset).where(Asset.campaign_id == regeneration.campaign_id, Asset.position == regeneration.position))
+        asset.image_url = post["image_url"]
+        asset.caption = post["caption"]
+        asset.visual_prompt = post["visual_prompt"]
+        regeneration.status = "completed"
+
+
+def get_asset_keys(order_id: str):
+    from sqlalchemy import select
+    with SessionLocal() as db:
+        order = db.get(Order, order_id)
+        if not order:
+            return []
+        assets = db.scalars(select(Asset).where(Asset.campaign_id == order.campaign_id).order_by(Asset.position)).all()
+        return [{"position": asset.position, "title": asset.title, "caption": asset.caption, "image_url": asset.image_url} for asset in assets]
+
+class PaymentInstructions(Base):
+    __tablename__ = "payment_instructions"
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"), primary_key=True)
+    pix_code: Mapped[str] = mapped_column(String(1000))
+    ticket_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    demo: Mapped[bool] = mapped_column(default=False)
+
+
+def save_payment_instructions(order_id: str, code: str, ticket_url: str | None, demo: bool):
+    with SessionLocal.begin() as db:
+        db.add(PaymentInstructions(order_id=order_id, pix_code=code, ticket_url=ticket_url, demo=demo))
+
+
+def get_payment_instructions(order_id: str):
+    with SessionLocal() as db:
+        payment = db.get(PaymentInstructions, order_id)
+        if payment is None:
+            return None
+        return {"pix_code": payment.pix_code, "ticket_url": payment.ticket_url, "demo_payment": payment.demo}

@@ -3,6 +3,7 @@ import base64
 import json
 import logging
 import os
+import re
 
 import httpx
 
@@ -116,7 +117,7 @@ class IAService:
         if self.api_key == MOCK_KEY:
             if os.getenv("ALLOW_MOCK_GENERATION", "false").lower() != "true":
                 raise RuntimeError("Configure OPENAI_API_KEY para gerar campanhas reais.")
-            return [{"title": title, "caption": f"Conheça {title}.", "visual_prompt": self._prompt(niche, style, title, goal), "image_url": MOCK_IMAGES[i % len(MOCK_IMAGES)]} for i, title in enumerate(titles)]
+            return [{"title": title, "caption": f"Vamos falar de {re.sub(r'^\s*\d+\s*[.)-]\s*', '', title)}. O que você gostaria de saber sobre {brief.get('product') or niche}?", "visual_prompt": self._prompt(niche, style, title, goal), "image_url": MOCK_IMAGES[i % len(MOCK_IMAGES)]} for i, title in enumerate(titles)]
 
         headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
         posts = []

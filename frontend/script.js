@@ -829,7 +829,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     state.titles = selectedStrategy.map(
-      (item, index) => `${index + 1}. ${item.title} — ${state.product}`
+      (item) => `${item.title} — ${state.product}`
     );
 
     state.title =
@@ -1341,16 +1341,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!deliveryGallery) return;
     deliveryGallery.replaceChildren();
     images.forEach((item) => {
+      // Pedidos antigos guardavam o número dentro do próprio título.
+      const title = (item.title || "").replace(/^\s*\d+\s*[.)-]\s*/, "");
+      const captionText = (item.caption || "").replace(/^Conheça\s+\d+\s*[.)-]\s*/i, "Conheça ");
       const figure = document.createElement("figure");
       figure.className = "delivery-card";
       const img = document.createElement("img");
       img.src = new URL(item.image_url, API_BASE).href;
-      img.alt = `Arte ${item.position + 1}: ${item.title}`;
+      img.alt = `Arte ${item.position + 1}: ${title}`;
       img.loading = "lazy";
       const caption = document.createElement("figcaption");
-      caption.textContent = `Post ${item.position + 1} · ${item.title}`;
+      caption.textContent = `Post ${item.position + 1} · ${title}`;
       const text = document.createElement("p");
-      text.textContent = item.caption || "";
+      text.textContent = captionText;
       const actions = document.createElement("div");
       actions.className = "delivery-actions";
       const copy = document.createElement("button");
@@ -1358,7 +1361,7 @@ document.addEventListener("DOMContentLoaded", () => {
       copy.className = "secondary-button";
       copy.textContent = "Copiar legenda";
       copy.addEventListener("click", async () => {
-        try { await navigator.clipboard.writeText(item.caption || ""); copy.textContent = "Legenda copiada"; }
+        try { await navigator.clipboard.writeText(captionText); copy.textContent = "Legenda copiada"; }
         catch (_) { showError(pixError, "Não foi possível copiar a legenda."); }
       });
       const regen = document.createElement("button");

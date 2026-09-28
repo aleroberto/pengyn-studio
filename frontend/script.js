@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateProgress(currentIndex + 2);
 
-    if (currentIndex + 1 === 3) {
+    if (currentIndex + 1 === 4) {
       highlightPreferredQuantity();
     }
   }
@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", () => {
 
         // Etapa 4: seleção do pacote
-        if (index === 3) {
+        if (index === 4) {
           const planCards = step.querySelectorAll(".price-card-onboarding");
 
           planCards.forEach((card) => {
@@ -301,11 +301,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  document.getElementById("brand-brief-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    state.product = document.getElementById("brief-product").value.trim();
+    state.audience = document.getElementById("brief-audience").value.trim();
+    state.colors = document.getElementById("brief-colors").value.trim();
+    state.notes = document.getElementById("brief-notes").value.trim();
+    if (state.product) goToNextStep(3);
+  });
+
   function createEmptyState() {
     return {
       niche: null,
       goal: null,
       style: null,
+      product: null,
+      audience: "",
+      colors: "",
+      notes: "",
       quantity: null,
       title: null,
       titles: [],
@@ -324,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!preferredQuantity) return;
 
     const qtyStep = document.querySelector(
-      '.question-block[data-step="4"]'
+      '.question-block[data-step="5"]'
     );
 
     if (!qtyStep || qtyStep.classList.contains("hidden")) {
@@ -724,6 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const outNiche = document.getElementById("out-niche");
     const outGoal = document.getElementById("out-goal");
     const outStyle = document.getElementById("out-style");
+    document.getElementById("out-product").textContent = state.product;
     const outQuantity = document.getElementById("out-quantity");
 
     if (outNiche) {
@@ -791,14 +805,17 @@ document.addEventListener("DOMContentLoaded", () => {
         </article>
       `;
 
-      gridContainer.insertAdjacentHTML(
-        "beforeend",
-        cardHTML
-      );
+      gridContainer.insertAdjacentHTML("beforeend", cardHTML);
+      const tile = gridContainer.lastElementChild;
+      const desc = tile.querySelector(".feed-tile-desc");
+      desc.textContent = `${item.desc} Tema aplicado a ${state.product}${state.audience ? ` para ${state.audience}` : ""}.`;
+      if (["Prova", "Oferta", "Urgência"].includes(item.title)) {
+        tile.querySelector(".feed-tile-title").textContent = item.title === "Prova" ? "Como funciona" : "Convite";
+      }
     });
 
     state.titles = selectedStrategy.map(
-      (item, index) => `${index + 1}. ${item.title}`
+      (item, index) => `${index + 1}. ${item.title} — ${state.product}`
     );
 
     state.title =
@@ -1157,7 +1174,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 goal:
                   state.goal || "",
                 titles:
-                  state.titles
+                  state.titles,
+                product: state.product,
+                audience: state.audience,
+                colors: state.colors,
+                notes: state.notes
               },
 
               client: {

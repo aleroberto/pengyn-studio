@@ -232,7 +232,7 @@
         </p>
 
         <div class="step-indicator" style="font-weight: 600; color: var(--primary); margin-bottom: 12px; font-size: 0.9rem;">
-          Etapa 1 de 4
+          Etapa 1 de 5
         </div>
 
         <div class="progress-bar" style="max-width: 600px; margin: 0 auto 40px;">
@@ -292,6 +292,17 @@
           </div>
 
           <div class="question-block hidden" data-step="4">
+            <h3>O que vamos divulgar?</h3>
+            <p class="question-helper">Informe dados reais; não inventaremos preços, depoimentos ou ofertas.</p>
+            <form id="brand-brief-form" class="brief-form">
+              <label>Produto ou serviço principal <input id="brief-product" maxlength="120" required placeholder="Ex.: hambúrguer artesanal"></label>
+              <label>Para quem é? <input id="brief-audience" maxlength="120" placeholder="Ex.: moradores da região"></label>
+              <label>Cores da marca <input id="brief-colors" maxlength="120" placeholder="Ex.: azul e branco"></label>
+              <label>Orientações confirmadas <textarea id="brief-notes" maxlength="500" rows="3" placeholder="Ex.: tom descontraído; não mencionar preços"></textarea></label>
+              <button type="submit" class="primary-button">Ver pacotes</button>
+            </form>
+          </div>
+          <div class="question-block hidden" data-step="5">
             <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Escolha seu pacote ideal.</h3>
             <div class="pricing-grid-onboarding">
               <div class="price-card-onboarding">
@@ -336,6 +347,7 @@
 
           <div class="strategy-context">
             <div><strong>Nicho:</strong> <span id="out-niche">-</span></div>
+            <div><strong>Produto:</strong> <span id="out-product">-</span></div>
             <div><strong>Objetivo:</strong> <span id="out-goal">-</span></div>
             <div><strong>Estilo:</strong> <span id="out-style">-</span></div>
             <div><strong>Pacote:</strong> <span id="out-quantity">-</span></div>

@@ -19,7 +19,7 @@ def test_checkout_persists_order(monkeypatch):
         database.init_db()
         client = TestClient(main.app)
         response = client.post("/api/v1/checkout", json={
-            "config": {"niche": "restaurante", "style": "premium", "title": "Menu de inverno", "titles": ["Prato 1"]},
+            "config": {"niche": "restaurante", "style": "premium", "title": "Menu de inverno", "titles": ["Prato 1"], "product": "Menu de inverno", "audience": "famílias", "colors": "azul", "notes": "sem preço"},
             "client": {"instagram": "restaurante", "whatsapp": "11999999999", "email": "owner@example.com"},
             "purchase": {"quantity": "3", "price": "R$ 9,90"},
         })
@@ -30,5 +30,10 @@ def test_checkout_persists_order(monkeypatch):
         assert saved.json()["status"] == "pending"
         assert saved.json()["amount_cents"] == 990
         assert saved.json()["campaign"]["title"] == "Menu de inverno"
+        from sqlalchemy import select
+        with database.SessionLocal() as session:
+            brief = session.scalar(select(database.CampaignBrief))
+            assert brief.details["product"] == "Menu de inverno"
+            assert brief.details["notes"] == "sem preço"
         assert client.get("/api/v1/orders/unknown").status_code == 403
         test_engine.dispose()

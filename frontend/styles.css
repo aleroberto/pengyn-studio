@@ -2296,3 +2296,17 @@ body > section:nth-of-type(even) {
 .delivery-card .secondary-button { width: 100%; margin-top: 12px; }
 #order-progress { margin: 14px 0; color: var(--primary); font-weight: 700; }
 #btn-download-campaign { margin-top: 24px; }
+
+/* Briefing */
+.brief-inline-form, .brief-form { display: grid; gap: 14px; max-width: 570px; margin: 24px auto 0; text-align: left; }
+.brief-inline-form { grid-template-columns: 1fr auto; align-items: end; }
+.brief-inline-form label { grid-column: 1 / -1; }
+.brief-form label { display: grid; gap: 8px; color: var(--muted); font-weight: 600; }
+.brief-inline-form input, .brief-form input, .brief-form textarea {
+  width: 100%; padding: 13px 15px; background: rgba(7, 11, 20, .65);
+  border: 1px solid var(--border); border-radius: 12px; color: var(--text);
+  font: inherit;
+}
+.brief-inline-form input:focus, .brief-form input:focus, .brief-form textarea:focus { outline: 2px solid var(--primary); }
+.brief-help { color: var(--muted); margin: 10px 0; }
+@media (max-width: 600px) { .brief-inline-form { grid-template-columns: 1fr; } }

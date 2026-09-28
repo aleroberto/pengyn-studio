@@ -292,3 +292,13 @@ Pedidos criados antes do M4 não possuem token e exigem uma estratégia de
 migração antes de disponibilizá-los na nova interface. Em ambiente de demo,
 as imagens ilustrativas externas não são armazenadas localmente; download
 completo requer geração real e storage configurado.
+
+## Interface — etapas 1 e 2
+
+A página apresenta o modo de pagamento informado pela API (`payment_mode`:
+`live`, `demo` ou `unavailable`) e diferencia exemplos visuais da campanha
+criada para o cliente. A prévia da campanha é montada localmente a partir de
+segmento, produto, público e objetivo; ela **não** chama a IA antes do pagamento.
+O briefing completo é salvo em `campaign_briefs` e entregue ao worker para
+orientar as legendas e os prompts visuais. A tabela adicional é criada no
+bootstrap atual; antes de operar com dados em produção, use migrações versionadas.

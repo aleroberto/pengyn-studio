@@ -78,9 +78,13 @@ class ClientData(BaseModel):
 
 
 class PostConfig(BaseModel):
-    niche: str
-    style: str
-    title: str
+    niche: str = Field(min_length=2, max_length=100)
+    style: str = Field(min_length=2, max_length=100)
+    title: str = Field(min_length=2, max_length=200)
+    product: str = Field(default="", max_length=120)
+    audience: str = Field(default="", max_length=120)
+    colors: str = Field(default="", max_length=120)
+    notes: str = Field(default="", max_length=500)
     goal: str = ""
     titles: list[str] = Field(default_factory=list)
 
@@ -230,6 +234,10 @@ async def create_checkout(payload: CheckoutPayload):
                 "title": payload.config.title,
                 "goal": payload.config.goal,
                 "titles": payload.config.titles,
+                "product": payload.config.product,
+                "audience": payload.config.audience,
+                "colors": payload.config.colors,
+                "notes": payload.config.notes,
             },
             "client": {
                 "instagram": instagram["username"],

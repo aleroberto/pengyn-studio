@@ -23,7 +23,8 @@ async def process_one(service=None, storage=None):
         service = service or IAService()
         storage = storage or ImageStorage()
         try:
-            posts = await service.generate_campaign(regen["niche"], regen["style"], [regen["title"]], regen["goal"], storage)
+            kwargs = {"brief": regen["brief"]} if any(regen["brief"].values()) else {}
+            posts = await service.generate_campaign(regen["niche"], regen["style"], [regen["title"]], regen["goal"], storage, **kwargs)
             finish_regeneration(regen["id"], posts[0])
         except Exception as exc:
             logger.exception("Regeneration failed for %s", regen["id"])
@@ -32,7 +33,8 @@ async def process_one(service=None, storage=None):
     service = service or IAService()
     storage = storage or ImageStorage()
     try:
-        posts = await service.generate_campaign(job["niche"], job["style"], titles_for(job), job["goal"], storage)
+        kwargs = {"brief": job["brief"]} if any(job["brief"].values()) else {}
+        posts = await service.generate_campaign(job["niche"], job["style"], titles_for(job), job["goal"], storage, **kwargs)
         complete_job(job["job_id"], posts)
     except Exception as exc:
         logger.exception("Generation failed for job %s", job["job_id"])

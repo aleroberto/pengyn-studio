@@ -62,6 +62,12 @@ class Order(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class CampaignBrief(Base):
+    __tablename__ = "campaign_briefs"
+    campaign_id: Mapped[str] = mapped_column(ForeignKey("campaigns.id"), primary_key=True)
+    details: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
 def init_db():
     Base.metadata.create_all(engine)
 
@@ -82,6 +88,7 @@ def record_checkout(order_data: dict, transaction_id: str) -> str:
         campaign = Campaign(brand_id=brand.id, title=config["title"], style=config["style"], goal=config["goal"], titles=config["titles"], status="awaiting_payment")
         db.add(campaign)
         db.flush()
+        db.add(CampaignBrief(campaign_id=campaign.id, details={key: config.get(key, "") for key in ("product", "audience", "colors", "notes")}))
         amount_cents = int(purchase["price"].replace("R$", "").strip().replace(",", ""))
         order = Order(campaign_id=campaign.id, transaction_id=transaction_id, quantity=int(purchase["quantity"]), amount_cents=amount_cents)
         db.add(order)
@@ -163,7 +170,8 @@ def claim_job():
         campaign = db.get(Campaign, order.campaign_id)
         brand = db.get(Brand, campaign.brand_id)
         campaign.status = "generating"
-        return {"job_id": job.id, "order_id": order.id, "campaign_id": campaign.id, "niche": brand.niche, "style": campaign.style, "title": campaign.title, "goal": campaign.goal, "titles": campaign.titles, "quantity": order.quantity}
+        brief = db.get(CampaignBrief, campaign.id)
+        return {"brief": brief.details if brief else {}, "job_id": job.id, "order_id": order.id, "campaign_id": campaign.id, "niche": brand.niche, "style": campaign.style, "title": campaign.title, "goal": campaign.goal, "titles": campaign.titles, "quantity": order.quantity}
 
 
 def complete_job(job_id: str, posts: list[dict]):
@@ -308,7 +316,8 @@ def claim_regeneration():
         campaign = db.get(Campaign, regeneration.campaign_id)
         brand = db.get(Brand, campaign.brand_id)
         asset = db.scalar(select(Asset).where(Asset.campaign_id == campaign.id, Asset.position == regeneration.position))
-        return {"id": regeneration.id, "campaign_id": campaign.id, "position": regeneration.position, "title": asset.title, "niche": brand.niche, "style": campaign.style, "goal": campaign.goal}
+        brief = db.get(CampaignBrief, campaign.id)
+        return {"brief": brief.details if brief else {}, "id": regeneration.id, "campaign_id": campaign.id, "position": regeneration.position, "title": asset.title, "niche": brand.niche, "style": campaign.style, "goal": campaign.goal}
 
 
 def finish_regeneration(regeneration_id: str, post: dict | None, error: str = ""):

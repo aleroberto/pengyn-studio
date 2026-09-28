@@ -180,6 +180,7 @@ body {
 
 .secondary-button {
   border: 1px solid var(--border);
+  background: #1E293B;
   color: #FFF;
   text-decoration: none;
   padding: 16px 24px;
@@ -188,7 +189,7 @@ body {
 }
 
 .secondary-button:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: #334155;
   border-color: rgba(255, 255, 255, 0.2);
 }
 

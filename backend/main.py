@@ -1,11 +1,14 @@
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field, ValidationError
 import logging
+import os
+from pathlib import Path
 import uvicorn
 
-from database import get_order, record_checkout, update_order
+from database import get_order, get_delivery, get_order_by_transaction_id, queue_paid_order, record_checkout
 from services.ia_service import IAService
 from services.instagram_service import InstagramService
 from services.payment_service import PRICE_MAP, PaymentService
@@ -26,6 +29,9 @@ app = FastAPI(
     description="Backend para geração de posts e validação de dados com IA",
     version="1.0.0",
 )
+
+Path(os.getenv("ASSET_DIR", "./assets")).mkdir(parents=True, exist_ok=True)
+app.mount("/assets", StaticFiles(directory=os.getenv("ASSET_DIR", "./assets")), name="assets")
 
 app.add_middleware(
     CORSMiddleware,
@@ -107,41 +113,24 @@ def _expected_titles(quantity: int, titles: list[str], fallback_title: str) -> l
 
 
 async def _fulfill_order(charge: dict) -> dict:
-    order = charge["order"]
-    config = order["config"]
-    titles = _expected_titles(
-        quantity=int(order["purchase"]["quantity"]),
-        titles=config.get("titles") or [],
-        fallback_title=config.get("title") or f"{config['niche']} — {config['style']}",
-    )
-
-    ia_result = await ia_service.generate_post_images(
-        niche=config["niche"],
-        style=config["style"],
-        titles=titles,
-        goal=config.get("goal") or "",
-    )
-
-    if ia_result.get("status") != "success":
-        raise HTTPException(
-            status_code=502,
-            detail=ia_result.get("message", "Falha ao gerar as artes."),
-        )
-
+    order_id = queue_paid_order(charge["transaction_id"])
+    if order_id is None:
+        raise HTTPException(status_code=404, detail="Pedido não encontrado.")
     payment_service.mark_paid(charge["transaction_id"])
-    update_order(charge["transaction_id"], "paid", "ready")
-    images = ia_result["images"]
-    return {
-        "status": "processed",
-        "action": "images_generated",
-        "url": images[0]["image_url"],
-        "images": images,
-    }
+    return {"status": "queued", "action": "generation_queued", "order_id": order_id, "images": []}
 
 
 @app.get("/")
 def read_root():
     return {"status": "online", "message": "Bem-vindo à API do Pengyn Studio!"}
+
+
+@app.get("/api/v1/orders/{order_id}/delivery")
+def read_delivery(order_id: str):
+    result = get_delivery(order_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Pedido não encontrado.")
+    return result
 
 
 @app.get("/api/v1/orders/{order_id}")
@@ -248,6 +237,8 @@ async def simulate_payment(payload: SimulatePaymentRequest):
     """
     Atalho da demo local: marca o PIX mockado como pago e dispara a geração.
     """
+    if os.getenv("ENABLE_DEMO_PAYMENT", "false").lower() != "true":
+        raise HTTPException(status_code=404, detail="Simulação indisponível.")
     try:
         logger.info(f"Simulando pagamento para transação: {payload.transaction_id}")
         
@@ -256,19 +247,11 @@ async def simulate_payment(payload: SimulatePaymentRequest):
             logger.warning(f"Transação não encontrada: {payload.transaction_id}")
             raise HTTPException(status_code=404, detail="Transação não encontrada. Gere o PIX de novo.")
 
-        if charge["status"] == "paid" and charge.get("images"):
-            logger.info(f"Transação já processada, retornando imagens existentes")
-            images = charge["images"]
-            return {
-                "status": "processed",
-                "action": "images_generated",
-                "url": images[0]["image_url"],
-                "images": images,
-            }
+        if charge["status"] == "paid":
+            return {"status": "queued", "order_id": get_order_by_transaction_id(charge["transaction_id"]), "images": []}
 
         logger.info(f"Processando pedido para transação: {payload.transaction_id}")
         result = await _fulfill_order(charge)
-        charge["images"] = result["images"]
         logger.info(f"Pedido processado com sucesso: {payload.transaction_id}")
         return result
     except HTTPException:
@@ -283,6 +266,8 @@ async def simulate_payment(payload: SimulatePaymentRequest):
 
 @app.post("/api/v1/webhook/payment")
 async def payment_webhook(notification: WebhookNotification):
+    if os.getenv("ENABLE_DEMO_PAYMENT", "false").lower() != "true":
+        raise HTTPException(status_code=404, detail="Webhook de demonstração indisponível.")
     try:
         logger.info(f"Webhook recebido: {notification.event} para transação {notification.transaction_id}")
         
@@ -297,7 +282,6 @@ async def payment_webhook(notification: WebhookNotification):
 
         logger.info(f"Processando webhook para transação: {notification.transaction_id}")
         result = await _fulfill_order(charge)
-        charge["images"] = result["images"]
         logger.info(f"Webhook processado com sucesso: {notification.transaction_id}")
         return result
     except HTTPException:

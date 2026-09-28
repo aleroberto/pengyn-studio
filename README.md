@@ -233,3 +233,31 @@ O PIX e a geração ainda são simulados e executados no processo da API. O webh
 atual não autentica o remetente e **não deve ser exposto como confirmação real de
 pagamento**. A próxima etapa integra geração, storage e processamento em segundo
 plano; depois vem o gateway PIX com validação de webhook.
+
+## M2 — geração de campanhas
+
+O pagamento de demonstração coloca o pedido na fila persistida `generation_jobs`.
+Execute a API e, em outro processo, `cd backend && python worker.py`. O worker
+cria legenda e prompt visual com o modelo de texto, gera uma imagem por post com
+`gpt-image-2`, salva os arquivos e registra os posts em `assets`. Consulte
+`GET /api/v1/orders/{order_id}/delivery`; estados: `queued`, `generating`,
+`ready` ou `failed`. A interface faz consultas periódicas após a simulação.
+
+Variáveis do worker e da API:
+
+- `OPENAI_API_KEY`: chave de API; necessária para imagens reais.
+- `IA_TEXT_MODEL` (padrão `gpt-4o-mini`), `IA_IMAGE_MODEL` (padrão `gpt-image-2`), `IA_IMAGE_QUALITY` (padrão `medium`).
+- `DATABASE_URL`: **a mesma URL** na API e no worker. PostgreSQL é recomendado para mais de um worker.
+- `S3_BUCKET`, `S3_ENDPOINT_URL`, `ASSET_PUBLIC_BASE_URL`: bucket S3/R2 e URL pública correspondente. Configure credenciais AWS usuais (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`) no worker. O bucket/URL deve permitir leitura dos assets entregues.
+- Sem bucket, `ASSET_DIR` (padrão `./assets`) guarda imagens localmente, servidas em `/assets`. API e worker precisam compartilhar esse diretório; o Docker Compose já compartilha `/data`.
+- `ENABLE_DEMO_PAYMENT=true` libera os endpoints de pagamento falso apenas para desenvolvimento. `ALLOW_MOCK_GENERATION=true` permite imagens demonstrativas sem API key.
+
+Exemplo local: `docker compose up --build`. Para geração real: defina
+`OPENAI_API_KEY` no `.env` e `ALLOW_MOCK_GENERATION=false`. O checkout ainda
+emite PIX falso: **não use esse fluxo para cobrar clientes**. O endpoint de
+webhook da demo não valida assinatura e fica desabilitado fora do modo demo.
+
+O worker atual registra falhas para inspeção, mas não reprocessa automaticamente.
+Não hospede o worker em Vercel; use um serviço contínuo com banco e storage
+persistentes. A integração com OpenAI e S3/R2 exige credenciais próprias e ainda
+não foi exercitada em ambiente externo.

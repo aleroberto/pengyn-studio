@@ -182,6 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
       whatsapp: null,
       price: null,
       transactionId: null,
+      orderId: null,
       pixCode: null
     };
   }
@@ -452,6 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         state.transactionId = data.transaction_id;
+        state.orderId = data.order_id;
         state.pixCode = data.pix_code;
         document.getElementById("out-transaction-id").textContent = state.transactionId;
         document.getElementById("out-pix-code").value = state.pixCode;
@@ -491,14 +493,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderDelivery(images) {
     if (!deliveryGallery) return;
-    deliveryGallery.innerHTML = images.map((item) => `
-      <figure class="delivery-card">
-        <img src="${item.image_url}" alt="${item.title}">
-        <figcaption>${item.title}</figcaption>
-      </figure>
-    `).join("");
+    deliveryGallery.replaceChildren();
+    images.forEach((item) => {
+      const figure = document.createElement("figure");
+      figure.className = "delivery-card";
+      const img = document.createElement("img");
+      img.src = new URL(item.image_url, API_BASE).href;
+      img.alt = item.title;
+      const caption = document.createElement("figcaption");
+      caption.textContent = item.title;
+      figure.append(img, caption);
+      deliveryGallery.append(figure);
+    });
     deliveryPanel.classList.remove("hidden");
     deliveryPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  async function waitForDelivery(orderId) {
+    for (let attempt = 0; attempt < 120; attempt++) {
+      const response = await fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(orderId)}/delivery`);
+      if (!response.ok) throw new Error("Não foi possível consultar o pedido.");
+      const delivery = await response.json();
+      if (delivery.status === "ready") return delivery.images;
+      if (delivery.status === "failed") throw new Error(delivery.error || "Falha na geração da campanha.");
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+    throw new Error("A geração continua em andamento. Consulte o pedido novamente em alguns minutos.");
   }
 
   const btnSimulate = document.getElementById("btn-simulate-payment");
@@ -513,10 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
           transaction_id: state.transactionId
         });
 
-        const images = data.images;
-        if (!images || !images.length) {
-          throw new Error("A API não devolveu as imagens do pacote.");
-        }
+        const images = await waitForDelivery(data.order_id || state.orderId);
 
         renderDelivery(images);
       } catch (err) {

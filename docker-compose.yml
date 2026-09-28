@@ -8,12 +8,30 @@ services:
       - "8000:8000"
     environment:
       - IA_API_KEY=${IA_API_KEY:-mock-key-para-desenvolvimento-local}
-      - IA_IMAGE_MODEL=${IA_IMAGE_MODEL:-dall-e-3}
+      - IA_IMAGE_MODEL=${IA_IMAGE_MODEL:-gpt-image-2}
       - DATABASE_URL=sqlite:////data/pengyn.db
+      - ENABLE_DEMO_PAYMENT=true
+      - ALLOW_MOCK_GENERATION=${ALLOW_MOCK_GENERATION:-true}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ASSET_DIR=/data/assets
     volumes:
       - ./backend:/app
       - pengyn_data:/data
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+  worker:
+    build: ./backend
+    command: python worker.py
+    environment:
+      - DATABASE_URL=sqlite:////data/pengyn.db
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - IA_IMAGE_MODEL=${IA_IMAGE_MODEL:-gpt-image-2}
+      - IA_IMAGE_QUALITY=${IA_IMAGE_QUALITY:-medium}
+      - IA_TEXT_MODEL=${IA_TEXT_MODEL:-gpt-4o-mini}
+      - ALLOW_MOCK_GENERATION=${ALLOW_MOCK_GENERATION:-true}
+      - ASSET_DIR=/data/assets
+    volumes:
+      - pengyn_data:/data
     restart: unless-stopped
 volumes:
   pengyn_data:

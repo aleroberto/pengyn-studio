@@ -128,7 +128,7 @@ async def _fulfill_order(charge: dict) -> dict:
 
 @app.get("/")
 def read_root():
-    return {"status": "online", "message": "Bem-vindo à API do Pengyn Studio!"}
+    return {"status": "online", "message": "Bem-vindo à API do Pengyn Studio!", "payment_mode": "live" if mercado_pago.token else "demo" if os.getenv("ENABLE_DEMO_PAYMENT", "false").lower() == "true" else "unavailable"}
 
 
 def require_order_access(order_id: str, request: Request):

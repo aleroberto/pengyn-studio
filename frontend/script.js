@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const textElement = document.querySelector(".dynamic-text");
-  const words = ["posts que vendem", "imagens exclusivas", "designs premium"];
+  const words = ["posts para sua marca", "uma campanha visual", "imagens e legendas"];
 
   let wordIndex = 0;
   let charIndex = words[wordIndex].length;
@@ -87,6 +87,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   let state = createEmptyState();
+  let paymentMode = "unavailable";
+  const modeLabel = document.querySelector(".engine-status");
+  const faqPix = document.getElementById("faq-pix-answer");
+  const checkoutSubmit = document.getElementById("btn-submit-checkout");
+  fetch(`${API_BASE}/`)
+    .then((response) => { if (!response.ok) throw new Error("API indisponível"); return response.json(); })
+    .then((data) => {
+      paymentMode = data.payment_mode || "unavailable";
+      if (paymentMode === "live") {
+        modeLabel.textContent = "Pagamento Pix disponível";
+        faqPix.textContent = "Sim. O código Pix é emitido pelo Mercado Pago. A geração começa após a confirmação do pagamento.";
+        checkoutSubmit.textContent = "Gerar Pix do pedido";
+      } else if (paymentMode === "demo") {
+        modeLabel.textContent = "Demonstração · sem cobrança";
+        faqPix.textContent = "Nesta demonstração, o Pix é fictício e o pagamento pode ser simulado para testar o fluxo.";
+        checkoutSubmit.textContent = "Gerar Pix de demonstração";
+      } else {
+        modeLabel.textContent = "Pedidos temporariamente indisponíveis";
+        faqPix.textContent = "O checkout está indisponível no momento. Você ainda pode explorar a prévia da campanha.";
+        checkoutSubmit.disabled = true;
+      }
+    })
+    .catch(() => {
+      modeLabel.textContent = "Serviço temporariamente indisponível";
+      faqPix.textContent = "Não foi possível confirmar a disponibilidade do checkout. Tente novamente mais tarde.";
+      checkoutSubmit.disabled = true;
+    });
   let preferredQuantity = null;
 
   const prices = {
@@ -832,6 +859,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (checkoutForm) {
       checkoutForm.reset();
     }
+    sessionStorage.removeItem("pengyn_order");
 
     if (checkoutPanel) {
       checkoutPanel.classList.add("hidden");
@@ -1165,6 +1193,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           state.pixCode =
             data.pix_code;
+          document.getElementById("order-reference").textContent = `Pedido ${state.orderId} · guarde esta página até baixar sua campanha.`;
 
           const transactionOutput =
             document.getElementById(
@@ -1344,6 +1373,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ? "PIX de demonstração: este código não é pagável. Use o botão de simulação."
           : "Pagamento do pedido em acompanhamento.";
         pixPanel.classList.remove("hidden");
+        document.getElementById("order-reference").textContent = `Pedido ${id} · guarde esta página até baixar sua campanha.`;
         waitForDelivery(id).then(renderDelivery).catch((err) => showError(pixError, err.message));
       }
     } catch (_) { sessionStorage.removeItem("pengyn_order"); }

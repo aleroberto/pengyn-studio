@@ -5,6 +5,7 @@ from pydantic import BaseModel, EmailStr, Field, ValidationError
 import logging
 import uvicorn
 
+from database import get_order, record_checkout, update_order
 from services.ia_service import IAService
 from services.instagram_service import InstagramService
 from services.payment_service import PRICE_MAP, PaymentService
@@ -128,6 +129,7 @@ async def _fulfill_order(charge: dict) -> dict:
         )
 
     payment_service.mark_paid(charge["transaction_id"])
+    update_order(charge["transaction_id"], "paid", "ready")
     images = ia_result["images"]
     return {
         "status": "processed",
@@ -140,6 +142,14 @@ async def _fulfill_order(charge: dict) -> dict:
 @app.get("/")
 def read_root():
     return {"status": "online", "message": "Bem-vindo à API do Pengyn Studio!"}
+
+
+@app.get("/api/v1/orders/{order_id}")
+def read_order(order_id: str):
+    order = get_order(order_id)
+    if order is None:
+        raise HTTPException(status_code=404, detail="Pedido não encontrado.")
+    return order
 
 
 @app.post("/api/v1/validate-instagram")
@@ -208,11 +218,13 @@ async def create_checkout(payload: CheckoutPayload):
             order=order,
         )
 
+        order_id = record_checkout(order, charge["transaction_id"])
         logger.info(f"Cobrança criada com sucesso: {charge['transaction_id']}")
         return {
             "success": True,
             "message": "Cobrança gerada com sucesso! Aguardando pagamento.",
             "transaction_id": charge["transaction_id"],
+            "order_id": order_id,
             "pix_code": charge["pix_copia_e_cola"],
             "order_summary": {
                 "client_email": str(payload.client.email),

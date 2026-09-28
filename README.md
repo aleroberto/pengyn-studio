@@ -219,3 +219,17 @@ Este projeto é uma demonstração educacional.
 ## 📞 Suporte
 
 Para dúvidas ou problemas, abra uma issue no repositório.
+## M1 — pedidos persistentes
+
+O checkout agora devolve `order_id` e grava cliente, marca, campanha e pedido em banco.
+`GET /api/v1/orders/{order_id}` informa o estado persistido do pedido e da campanha.
+Use `DATABASE_URL=postgresql+psycopg://usuario:senha@host:5432/pengyn`
+para PostgreSQL. Sem essa variável, o desenvolvimento local usa `backend/pengyn.db`
+(SQLite). Configure um banco persistente no deploy: o disco temporário da Vercel
+não serve para armazenar pedidos. O schema é criado automaticamente nesta primeira
+etapa; migrações versionadas serão necessárias antes de alterar dados de produção.
+
+O PIX e a geração ainda são simulados e executados no processo da API. O webhook
+atual não autentica o remetente e **não deve ser exposto como confirmação real de
+pagamento**. A próxima etapa integra geração, storage e processamento em segundo
+plano; depois vem o gateway PIX com validação de webhook.

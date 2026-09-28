@@ -16,3 +16,6 @@ htmlcov/
 # Sistema
 .DS_Store
 Thumbs.db
+# Local order database
+*.db
+*.db-journal

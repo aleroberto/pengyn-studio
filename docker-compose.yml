@@ -9,7 +9,11 @@ services:
     environment:
       - IA_API_KEY=${IA_API_KEY:-mock-key-para-desenvolvimento-local}
       - IA_IMAGE_MODEL=${IA_IMAGE_MODEL:-dall-e-3}
+      - DATABASE_URL=sqlite:////data/pengyn.db
     volumes:
       - ./backend:/app
+      - pengyn_data:/data
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     restart: unless-stopped
+volumes:
+  pengyn_data:

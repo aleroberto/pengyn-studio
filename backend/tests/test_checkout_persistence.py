@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 def test_checkout_persists_order(monkeypatch):
     with tempfile.TemporaryDirectory() as directory:
+        monkeypatch.setenv("ENABLE_DEMO_PAYMENT", "true")
         monkeypatch.setenv("DATABASE_URL", f"sqlite:///{directory}/orders.db")
         import database
         import main

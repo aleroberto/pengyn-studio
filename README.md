@@ -261,3 +261,18 @@ O worker atual registra falhas para inspeção, mas não reprocessa automaticame
 Não hospede o worker em Vercel; use um serviço contínuo com banco e storage
 persistentes. A integração com OpenAI e S3/R2 exige credenciais próprias e ainda
 não foi exercitada em ambiente externo.
+
+## M3 — Pix pelo Mercado Pago
+
+Defina `MP_ACCESS_TOKEN` e `MP_WEBHOOK_SECRET` na API. O checkout usa
+`POST /v1/payments` com `X-Idempotency-Key` por pedido e devolve o Pix gerado
+pelo Mercado Pago. Cadastre `https://SEU_BACKEND/api/v1/webhooks/mercado-pago`
+como URL de webhook para o tópico `payment`. O webhook verifica HMAC, busca o
+pagamento no gateway e confere ID, referência, valor, meio Pix e status aprovado
+antes de enfileirar a campanha. Eventos repetidos não criam outro job.
+
+Sem `MP_ACCESS_TOKEN`, o checkout só funciona se `ENABLE_DEMO_PAYMENT=true`.
+Com token configurado, os endpoints de simulação são bloqueados. **Não aceite
+pagamentos reais antes de validar a integração em conta de testes e configurar
+banco, worker e storage persistentes no mesmo ambiente.** A API na Vercel
+sem worker contínuo não processa a campanha.

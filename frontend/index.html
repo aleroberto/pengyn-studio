@@ -393,26 +393,28 @@
                 <input type="email" id="client-email" name="email" required placeholder="voce@email.com" autocomplete="email">
               </label>
               <p id="checkout-error" class="form-error hidden" role="alert"></p>
-              <button type="submit" id="btn-submit-checkout" class="primary-button">Gerar PIX de demonstração</button>
+              <button type="submit" id="btn-submit-checkout" class="primary-button">Gerar PIX</button>
             </form>
           </div>
 
           <div id="pix-panel" class="flow-panel hidden">
-            <h3>PIX de demonstração</h3>
-            <p class="flow-note">Este código <strong>não é pagável</strong>. É uma simulação local para avançar o fluxo.</p>
+            <h3>PIX do pedido</h3>
+            <p id="pix-explanation" class="flow-note">Aguardando confirmação do pagamento.</p>
             <p class="pix-meta">Transação: <span id="out-transaction-id">-</span></p>
             <textarea id="out-pix-code" readonly rows="4"></textarea>
             <div class="pix-actions">
               <button type="button" id="btn-copy-pix" class="secondary-button">Copiar código</button>
               <button type="button" id="btn-simulate-payment" class="primary-button">Simular pagamento aprovado</button>
             </div>
+            <p id="order-progress" class="flow-note" role="status"></p>
             <p id="pix-error" class="form-error hidden" role="alert"></p>
           </div>
 
           <div id="delivery-panel" class="flow-panel hidden">
             <h3>Artes do pacote</h3>
-            <p class="flow-note">Cada card da estratégia vira uma imagem mock nesta demo. Sem envio por e-mail ou WhatsApp.</p>
+            <p class="flow-note">Sua campanha está pronta. Baixe as imagens e as legendas ou solicite uma nova versão de um post.</p>
             <div id="delivery-gallery" class="delivery-gallery"></div>
+            <button id="btn-download-campaign" type="button" class="secondary-button">Baixar campanha (.zip)</button>
           </div>
         </div>
 

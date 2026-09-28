@@ -288,6 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
       price: null,
       transactionId: null,
       orderId: null,
+      orderToken: null,
       pixCode: null
     };
   }
@@ -1154,6 +1155,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
           state.orderId =
             data.order_id;
+          state.orderToken = data.order_token;
+          sessionStorage.setItem("pengyn_order", JSON.stringify({id: state.orderId, token: state.orderToken, demo: data.demo_payment}));
+          document.getElementById("btn-simulate-payment").classList.toggle("hidden", !data.demo_payment);
+          document.getElementById("pix-explanation").textContent = data.demo_payment
+            ? "PIX de demonstração: este código não é pagável. Use o botão de simulação."
+            : "Pague o Pix e acompanhe a confirmação nesta página.";
+          if (!data.demo_payment) waitForDelivery(state.orderId).then(renderDelivery).catch((err) => showError(pixError, err.message));
 
           state.pixCode =
             data.pix_code;
@@ -1258,73 +1266,99 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderDelivery(images) {
-  if (!deliveryGallery) {
-    return;
-  }
-
-  deliveryGallery.replaceChildren();
-
-  images.forEach((item) => {
-    const figure = document.createElement("figure");
-    figure.className = "delivery-card";
-
-    const img = document.createElement("img");
-    img.src = new URL(item.image_url, API_BASE).href;
-    img.alt = item.title;
-
-    const caption = document.createElement("figcaption");
-    caption.textContent = item.title;
-
-    figure.append(img, caption);
-    deliveryGallery.append(figure);
-  });
-
-  if (deliveryPanel) {
-    deliveryPanel.classList.remove(
-      "hidden"
-    );
-
-    deliveryPanel.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest"
+    if (!deliveryGallery) return;
+    deliveryGallery.replaceChildren();
+    images.forEach((item) => {
+      const figure = document.createElement("figure");
+      figure.className = "delivery-card";
+      const img = document.createElement("img");
+      img.src = new URL(item.image_url, API_BASE).href;
+      img.alt = item.title;
+      const caption = document.createElement("figcaption");
+      caption.textContent = item.title;
+      const text = document.createElement("p");
+      text.textContent = item.caption || "";
+      const regen = document.createElement("button");
+      regen.type = "button";
+      regen.className = "secondary-button";
+      regen.textContent = item.regeneration_status === "completed" ? "Nova versão entregue" : item.regeneration_status ? "Nova versão em andamento" : "Gerar nova versão";
+      regen.disabled = Boolean(item.regeneration_status);
+      regen.addEventListener("click", async () => {
+        regen.disabled = true;
+        try {
+          const response = await fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(state.orderId)}/posts/${item.position}/regenerate`, {
+            method: "POST", headers: {"X-Order-Token": state.orderToken}
+          });
+          if (!response.ok) throw new Error("Não foi possível solicitar a nova versão.");
+          regen.textContent = "Gerando nova versão...";
+          const images = await waitForRegeneration(state.orderId, item.position);
+          renderDelivery(images);
+        } catch (err) { showError(pixError, err.message); }
+      });
+      figure.append(img, caption, text, regen);
+      deliveryGallery.append(figure);
     });
-  }
-}
-
-async function waitForDelivery(orderId) {
-  for (let attempt = 0; attempt < 120; attempt++) {
-    const response = await fetch(
-      `${API_BASE}/api/v1/orders/${encodeURIComponent(orderId)}/delivery`
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        "Não foi possível consultar o pedido."
-      );
-    }
-
-    const delivery = await response.json();
-
-    if (delivery.status === "ready") {
-      return delivery.images;
-    }
-
-    if (delivery.status === "failed") {
-      throw new Error(
-        delivery.error ||
-        "Falha na geração da campanha."
-      );
-    }
-
-    await new Promise((resolve) =>
-      setTimeout(resolve, 3000)
-    );
+    deliveryPanel.classList.remove("hidden");
+    deliveryPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
-  throw new Error(
-    "A geração continua em andamento. Consulte o pedido novamente em alguns minutos."
-  );
-}
+  async function waitForRegeneration(orderId, position) {
+    for (let attempt = 0; attempt < 120; attempt++) {
+      const response = await fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(orderId)}/delivery`, {headers: {"X-Order-Token": state.orderToken}});
+      if (!response.ok) throw new Error("Falha ao consultar a nova versão.");
+      const delivery = await response.json();
+      const post = delivery.images.find((item) => item.position === position);
+      if (post?.regeneration_status === "completed") return delivery.images;
+      if (post?.regeneration_status === "failed") throw new Error("A nova versão falhou. Entre em contato com o suporte.");
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+    throw new Error("A nova versão continua em andamento.");
+  }
+
+  async function waitForDelivery(orderId) {
+    for (let attempt = 0; attempt < 120; attempt++) {
+      const response = await fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(orderId)}/delivery`, {
+        headers: {"X-Order-Token": state.orderToken}
+      });
+      if (!response.ok) throw new Error("Não foi possível consultar o pedido.");
+      const delivery = await response.json();
+      document.getElementById("order-progress").textContent = {
+        awaiting_payment: "Aguardando pagamento", queued: "Pagamento confirmado · aguardando geração",
+        generating: "Criando a campanha", ready: "Campanha pronta"
+      }[delivery.status] || "Aguardando atualização";
+      if (delivery.status === "ready") return delivery.images;
+      if (delivery.status === "failed") throw new Error(delivery.error || "Falha na geração da campanha.");
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+    throw new Error("A geração continua em andamento. Consulte o pedido novamente em alguns minutos.");
+  }
+
+  const saved = sessionStorage.getItem("pengyn_order");
+  if (saved) {
+    try {
+      const {id, token, demo} = JSON.parse(saved);
+      if (id && token) {
+        state.orderId = id; state.orderToken = token;
+        document.getElementById("btn-simulate-payment").classList.toggle("hidden", !demo);
+        document.getElementById("pix-explanation").textContent = demo
+          ? "PIX de demonstração: este código não é pagável. Use o botão de simulação."
+          : "Pagamento do pedido em acompanhamento.";
+        pixPanel.classList.remove("hidden");
+        waitForDelivery(id).then(renderDelivery).catch((err) => showError(pixError, err.message));
+      }
+    } catch (_) { sessionStorage.removeItem("pengyn_order"); }
+  }
+
+  document.getElementById("btn-download-campaign")?.addEventListener("click", async () => {
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/orders/${encodeURIComponent(state.orderId)}/download`, {headers: {"X-Order-Token": state.orderToken}});
+      if (!response.ok) throw new Error("Não foi possível baixar a campanha.");
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = url; link.download = `pengyn-${state.orderId}.zip`; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (err) { showError(pixError, err.message); }
+  });
 
   const btnSimulate =
     document.getElementById(
@@ -1355,9 +1389,7 @@ async function waitForDelivery(orderId) {
             }
           );
 
-         const images = await waitForDelivery(
-            data.order_id || state.orderId
-      );
+         const images = await waitForDelivery(data.order_id || state.orderId);
 
           renderDelivery(images);
 

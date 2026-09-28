@@ -25,10 +25,10 @@ def test_checkout_persists_order(monkeypatch):
         })
         assert response.status_code == 200, response.text
         order_id = response.json()["order_id"]
-        saved = client.get(f"/api/v1/orders/{order_id}")
+        saved = client.get(f"/api/v1/orders/{order_id}", headers={"X-Order-Token": response.json()["order_token"]})
         assert saved.status_code == 200
         assert saved.json()["status"] == "pending"
         assert saved.json()["amount_cents"] == 990
         assert saved.json()["campaign"]["title"] == "Menu de inverno"
-        assert client.get("/api/v1/orders/unknown").status_code == 404
+        assert client.get("/api/v1/orders/unknown").status_code == 403
         test_engine.dispose()

@@ -2290,3 +2290,9 @@ body > section:nth-of-type(even) {
     font-size: clamp(.58rem, 3.1vw, .78rem);
   }
 }
+
+/* Entrega da campanha */
+.delivery-card p { color: var(--muted); line-height: 1.5; margin: 12px 0; white-space: pre-wrap; }
+.delivery-card .secondary-button { width: 100%; margin-top: 12px; }
+#order-progress { margin: 14px 0; color: var(--primary); font-weight: 700; }
+#btn-download-campaign { margin-top: 24px; }

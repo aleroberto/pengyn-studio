@@ -276,3 +276,19 @@ Com token configurado, os endpoints de simulação são bloqueados. **Não aceit
 pagamentos reais antes de validar a integração em conta de testes e configurar
 banco, worker e storage persistentes no mesmo ambiente.** A API na Vercel
 sem worker contínuo não processa a campanha.
+
+## M4 — entrega ao cliente
+
+O checkout retorna `order_token` uma única vez. A interface o guarda na sessão
+do navegador para acompanhar o pedido, consultar a galeria, pedir **uma** nova
+versão por post e baixar imagens e legendas em ZIP. As rotas de pedido exigem
+`X-Order-Token`; somente o hash do token é salvo no banco. Salve o token de
+forma segura caso precise recuperar o pedido fora da sessão atual. Esse acesso
+por token é provisório; histórico e login ficam para o M5.
+
+Rotas: `GET /api/v1/orders/{id}/delivery`, `POST /api/v1/orders/{id}/posts/{position}/regenerate`
+e `GET /api/v1/orders/{id}/download`. O ZIP usa o mesmo storage da geração.
+Pedidos criados antes do M4 não possuem token e exigem uma estratégia de
+migração antes de disponibilizá-los na nova interface. Em ambiente de demo,
+as imagens ilustrativas externas não são armazenadas localmente; download
+completo requer geração real e storage configurado.

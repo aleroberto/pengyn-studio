@@ -17,7 +17,6 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-snap-type: y proximity;
   scroll-padding-top: 90px;
 }
 
@@ -918,8 +917,6 @@ body > section:nth-of-type(even) {
   color: var(--primary);
   font-weight: 700;
   display: inline;
-  min-width: 280px;
-  text-align: left;
 }
 
 .hidden {
@@ -2365,4 +2362,109 @@ body > section:nth-of-type(even) {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
+}
+
+/* Prévia em formato de perfil: miniaturas + explicações legíveis fora da grade. */
+.feed-preview-shell {
+  width: min(100%, 690px);
+  padding: clamp(14px, 3vw, 26px);
+  background: #0B101B;
+}
+
+.feed-preview-shell::before { display: none; }
+
+.feed-profile-bar {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 2px;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+
+.feed-profile-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  height: 38px;
+  border: 2px solid #818CF8;
+  border-radius: 50%;
+  background: #242045;
+  font-weight: 800;
+}
+
+.feed-profile-name { flex: 1; color: #F8FAFC; font-size: .9rem; font-weight: 700; }
+.feed-profile-name small { display: block; margin-top: 2px; color: #94A3B8; font-size: .72rem; font-weight: 400; }
+.feed-profile-menu { color: #E2E8F0; font-weight: 800; letter-spacing: .12em; }
+
+.feed-preview-shell .feed-strategy-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 3px !important;
+}
+
+.feed-strategy-grid > .feed-post {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  aspect-ratio: 1;
+  margin: 0;
+  padding: clamp(8px, 2vw, 18px);
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(145deg, #2B3765, #202449 55%, #10192D);
+  background-size: cover;
+  background-position: center;
+  color: #FFF;
+  text-align: left;
+}
+
+.feed-strategy-grid > .feed-post[data-variant="1"] { background-color: #4B2360; background-image: linear-gradient(145deg, #704393, #4B2360 56%, #1E1839); }
+.feed-strategy-grid > .feed-post[data-variant="2"] { background-color: #185365; background-image: linear-gradient(145deg, #287588, #185365 56%, #132C44); }
+.feed-strategy-grid > .feed-post[data-variant="3"] { background-color: #633857; background-image: linear-gradient(145deg, #995171, #633857 56%, #30213D); }
+.feed-strategy-grid > .feed-post.feed-post--photo { background-size: cover; background-position: center; }
+.feed-strategy-grid > .feed-post::before { display: none; }
+
+.feed-result-card[data-style="minimalista"] .feed-strategy-grid > .feed-post:not(.feed-post--photo) {
+  background: linear-gradient(145deg, #293F65, #24335C 60%, #171C3E);
+}
+
+.feed-post-label {
+  position: relative;
+  width: fit-content;
+  padding: 4px 6px;
+  background: rgba(8, 13, 27, .7);
+  border-radius: 4px;
+  color: #FFF;
+  font-size: clamp(.58rem, 1.3vw, .72rem);
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.feed-post figcaption {
+  position: relative;
+  max-width: 100%;
+  color: #FFF;
+  font-size: clamp(.78rem, 2vw, 1.3rem);
+  font-weight: 800;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 8px rgba(0,0,0,.65);
+}
+
+.feed-preview-disclaimer { margin: 12px 0 18px; color: #AAB9D0; font-size: .8rem; line-height: 1.5; }
+.feed-plan-heading { color: #F8FAFC; font-size: 1.08rem; margin: 18px 0 12px; }
+.feed-plan-list { display: grid; gap: 0; list-style: none; padding: 0; text-align: left; }
+.feed-plan-list li { display: grid; gap: 4px; padding: 13px 2px; border-top: 1px solid rgba(255,255,255,.1); }
+.feed-plan-list strong { color: #F8FAFC; font-size: .95rem; }
+.feed-plan-list span { color: #BAC7D9; font-size: .88rem; line-height: 1.5; }
+
+@media (max-width: 600px) {
+  .hero h1 { font-size: clamp(2rem, 8vw, 2.75rem); min-height: 0; }
+  .feed-preview-shell { padding: 12px; border-radius: 16px; }
+  .feed-preview-shell .feed-strategy-grid { gap: 2px !important; }
+  .feed-strategy-grid > .feed-post { padding: 7px; }
+  .feed-post figcaption { font-size: clamp(.72rem, 3.2vw, .95rem); }
+  .feed-post-label { font-size: .57rem; }
 }

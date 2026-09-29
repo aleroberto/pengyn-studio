@@ -52,9 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const textElement = document.querySelector(".dynamic-text");
   const words = ["posts para sua marca", "uma campanha visual", "imagens e legendas"];
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (textElement && !prefersReducedMotion) {
+  if (textElement) {
     let wordIndex = 0;
     let charIndex = words[wordIndex].length;
     let isDeleting = true;

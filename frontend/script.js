@@ -79,33 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   let state = createEmptyState();
-  let paymentMode = "unavailable";
   const modeLabel = document.querySelector(".engine-status");
-  const faqPix = document.getElementById("faq-pix-answer");
-  const checkoutSubmit = document.getElementById("btn-submit-checkout");
-  fetch(`${API_BASE}/`)
-    .then((response) => { if (!response.ok) throw new Error("API indisponível"); return response.json(); })
-    .then((data) => {
-      paymentMode = data.payment_mode || "unavailable";
-      if (paymentMode === "live") {
-        modeLabel.textContent = "Pagamento Pix disponível";
-        faqPix.textContent = "Sim. O código Pix é emitido pelo Mercado Pago. A geração começa após a confirmação do pagamento.";
-        checkoutSubmit.textContent = "Gerar Pix do pedido";
-      } else if (paymentMode === "demo") {
-        modeLabel.textContent = "Demonstração · sem cobrança";
-        faqPix.textContent = "Nesta demonstração, o Pix é fictício e o pagamento pode ser simulado para testar o fluxo.";
-        checkoutSubmit.textContent = "Gerar Pix de demonstração";
-      } else {
-        modeLabel.textContent = "Pedidos temporariamente indisponíveis";
-        faqPix.textContent = "O checkout está indisponível no momento. Você ainda pode explorar a prévia da campanha.";
-        checkoutSubmit.disabled = true;
-      }
-    })
-    .catch(() => {
-      modeLabel.textContent = "Serviço temporariamente indisponível";
-      faqPix.textContent = "Não foi possível confirmar a disponibilidade do checkout. Tente novamente mais tarde.";
-      checkoutSubmit.disabled = true;
-    });
+  if (modeLabel) modeLabel.textContent = "Atendimento pelo WhatsApp";
+
   let preferredQuantity = null;
 
   const prices = {
@@ -814,7 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (btnCheckout) {
       btnCheckout.textContent =
-        `Criar meus ${state.quantity} posts — ${state.price}`;
+        `Solicitar ${state.quantity} posts pelo WhatsApp`;
     }
 
     resultCard.scrollIntoView({
@@ -1080,34 +1056,34 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-checkout");
 
   if (btnCheckout && checkoutPanel) {
+    btnCheckout.addEventListener("click", () => {
+      checkoutPanel.classList.remove("hidden");
+      const summary = document.getElementById("checkout-summary");
+      summary.replaceChildren();
+      [`Produto: ${state.product}`, `Pacote: ${state.quantity} posts`, `Valor anunciado: ${state.price}`,
+        "Pagamento e prazo combinados antes de confirmar o pedido"].forEach((line) => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        summary.append(p);
+      });
 
-    btnCheckout.addEventListener(
-      "click",
-      () => {
-
-        if (pixPanel) {
-          pixPanel.classList.add("hidden");
-        }
-
-        if (deliveryPanel) {
-          deliveryPanel.classList.add("hidden");
-        }
-
-        checkoutPanel.classList.remove("hidden");
-        const summary = document.getElementById("checkout-summary");
-        summary.replaceChildren();
-        [`Produto: ${state.product}`, `Pacote: ${state.quantity} posts`, `Total: ${state.price}`,
-          "Pagamento único via Pix · imagem quadrada e legenda por post",
-          "Entrega: galeria e ZIP após confirmação e geração"].forEach((line) => {
-          const p = document.createElement("p"); p.textContent = line; summary.append(p);
-        });
-
-        checkoutPanel.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest"
-        });
-      }
-    );
+      const message = [
+        "Olá! Montei uma prévia no Pengyn Studio e gostaria de solicitar uma campanha.",
+        `Pacote: ${state.quantity} posts (${state.price})`,
+        `Nicho: ${formatText(state.niche)}`,
+        `Produto ou serviço: ${state.product}`,
+        `Objetivo: ${labelFor(goalLabels, state.goal)}`,
+        `Estilo: ${labelFor(styleLabels, state.style)}`,
+        state.audience ? `Público: ${state.audience}` : null,
+        state.colors ? `Cores: ${state.colors}` : null,
+        state.notes ? `Orientações: ${state.notes}` : null,
+        `Temas sugeridos: ${state.titles.join("; ")}`,
+        "Podemos confirmar prazo, pagamento e forma de entrega?"
+      ].filter(Boolean).join("\n");
+      document.getElementById("pilot-whatsapp-link").href =
+        `https://wa.me/5511967858493?text=${encodeURIComponent(message)}`;
+      checkoutPanel.scrollIntoView({behavior: "smooth", block: "nearest"});
+    });
   }
 
   if (checkoutForm) {
@@ -1479,7 +1455,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showError(pixError, err.message);
     }
   }
-  restoreOrder();
+  // O piloto não recupera pedidos nem chama a API de pagamento.
 
   document.getElementById("btn-download-campaign")?.addEventListener("click", async () => {
     try {

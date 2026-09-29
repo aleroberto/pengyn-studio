@@ -788,6 +788,16 @@ body > section:nth-of-type(even) {
 
 .checkout-terms a { color: #C7D2FE; }
 
+.pilot-whatsapp-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+
 .price-card {
   position: relative;
   background: rgba(17, 24, 39, .7);

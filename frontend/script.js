@@ -50,6 +50,34 @@ document.addEventListener("DOMContentLoaded", () => {
     logoTop.style.cursor = "pointer";
   }
 
+  const textElement = document.querySelector(".dynamic-text");
+  const words = ["posts para sua marca", "uma campanha visual", "imagens e legendas"];
+
+  if (textElement) {
+    let wordIndex = 0;
+    let charIndex = words[wordIndex].length;
+    let isDeleting = true;
+
+    function typeEffect() {
+      const currentWord = words[wordIndex];
+      charIndex += isDeleting ? -1 : 1;
+      textElement.textContent = currentWord.slice(0, charIndex);
+
+      let delay = isDeleting ? 50 : 100;
+      if (!isDeleting && charIndex === currentWord.length) {
+        delay = 2000;
+        isDeleting = true;
+      } else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        wordIndex = (wordIndex + 1) % words.length;
+        delay = 500;
+      }
+      setTimeout(typeEffect, delay);
+    }
+
+    setTimeout(typeEffect, 1000);
+  }
+
   let state = createEmptyState();
   let paymentMode = "unavailable";
   const modeLabel = document.querySelector(".engine-status");

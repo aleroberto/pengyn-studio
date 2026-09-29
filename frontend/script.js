@@ -50,45 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
     logoTop.style.cursor = "pointer";
   }
 
-  const textElement = document.querySelector(".dynamic-text");
-  const words = ["posts para sua marca", "uma campanha visual", "imagens e legendas"];
-
-  let wordIndex = 0;
-  let charIndex = words[wordIndex].length;
-  let isDeleting = true;
-  let typeSpeed = 100;
-
-  function typeEffect() {
-    const currentWord = words[wordIndex];
-
-    if (isDeleting) {
-      charIndex--;
-      typeSpeed = 50;
-    } else {
-      charIndex++;
-      typeSpeed = 100;
-    }
-
-    if (textElement) {
-      textElement.textContent = currentWord.substring(0, charIndex);
-    }
-
-    if (!isDeleting && charIndex === currentWord.length) {
-      typeSpeed = 2000;
-      isDeleting = true;
-    } else if (isDeleting && charIndex === 0) {
-      isDeleting = false;
-      wordIndex = (wordIndex + 1) % words.length;
-      typeSpeed = 500;
-    }
-
-    setTimeout(typeEffect, typeSpeed);
-  }
-
-  if (textElement) {
-    setTimeout(typeEffect, 1000);
-  }
-
   let state = createEmptyState();
   let paymentMode = "unavailable";
   const modeLabel = document.querySelector(".engine-status");
@@ -717,24 +678,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return map[value] || formatText(value);
   }
 
-  function buildJourney(journey) {
-    const journeyEl = document.querySelector(".strategy-journey");
-
-    if (!journeyEl) return;
-
-    journeyEl.innerHTML = journey
-      .map((item, index) => {
-        const label = `<span>${item}</span>`;
-
-        const arrow = index < journey.length - 1
-          ? '<span class="journey-arrow">→</span>'
-          : "";
-
-        return label + arrow;
-      })
-      .join("");
-  }
-
   function generateDynamicStrategy() {
     const resultCard = document.getElementById("result-card");
     const gridContainer = document.getElementById("dynamic-grid");
@@ -786,45 +729,42 @@ document.addEventListener("DOMContentLoaded", () => {
       .map((index) => blueprint.items[index])
       .filter(Boolean);
 
-    buildJourney(blueprint.journey);
+    gridContainer.replaceChildren();
+    const planList = document.getElementById("feed-plan-list");
+    if (planList) planList.replaceChildren();
 
-    gridContainer.innerHTML = "";
+    const imageByNiche = {
+      hamburgueria: "images/hamburgueria.jpg",
+      barbearia: "images/barbearia.jfif",
+      estetica: "images/estetica.jfif"
+    };
+    const illustrativeImage = imageByNiche[state.niche];
 
     selectedStrategy.forEach((item, index) => {
       const number = String(index + 1).padStart(2, "0");
+      const post = document.createElement("figure");
+      post.className = "feed-post";
+      post.dataset.variant = String(index % 4);
+      if (illustrativeImage && index % 3 === 0) {
+        post.classList.add("feed-post--photo");
+        post.style.backgroundImage = `linear-gradient(180deg, rgba(5, 9, 20, .08) 10%, rgba(5, 9, 20, .88) 100%), url("${illustrativeImage}")`;
+      }
+      const label = document.createElement("span");
+      label.className = "feed-post-label";
+      label.textContent = `POST ${number}`;
+      const title = document.createElement("figcaption");
+      title.textContent = item.title === "Prova" ? "Como funciona" : item.title;
+      post.append(label, title);
+      gridContainer.append(post);
 
-      const cardHTML = `
-        <article class="feed-tile reveal active">
-
-          <span class="feed-tile-number">
-            ${number}
-          </span>
-
-          <div class="feed-tile-content">
-
-            <span class="feed-tile-kicker">
-              ${item.phase}
-            </span>
-
-            <h4 class="feed-tile-title">
-              ${item.title}
-            </h4>
-
-          </div>
-
-          <p class="feed-tile-desc">
-            ${item.desc}
-          </p>
-
-        </article>
-      `;
-
-      gridContainer.insertAdjacentHTML("beforeend", cardHTML);
-      const tile = gridContainer.lastElementChild;
-      const desc = tile.querySelector(".feed-tile-desc");
-      desc.textContent = `${item.desc} Tema aplicado a ${state.product}${state.audience ? ` para ${state.audience}` : ""}.`;
-      if (["Prova", "Oferta", "Urgência"].includes(item.title)) {
-        tile.querySelector(".feed-tile-title").textContent = item.title === "Prova" ? "Como funciona" : "Convite";
+      if (planList) {
+        const detail = document.createElement("li");
+        const heading = document.createElement("strong");
+        heading.textContent = `${number} · ${item.title}`;
+        const explanation = document.createElement("span");
+        explanation.textContent = item.desc;
+        detail.append(heading, explanation);
+        planList.append(detail);
       }
     });
 

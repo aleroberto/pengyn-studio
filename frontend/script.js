@@ -1129,6 +1129,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const summary = document.getElementById("checkout-summary");
         summary.replaceChildren();
         [`Produto: ${state.product}`, `Pacote: ${state.quantity} posts`, `Total: ${state.price}`,
+          "Pagamento único via Pix · imagem quadrada e legenda por post",
           "Entrega: galeria e ZIP após confirmação e geração"].forEach((line) => {
           const p = document.createElement("p"); p.textContent = line; summary.append(p);
         });
